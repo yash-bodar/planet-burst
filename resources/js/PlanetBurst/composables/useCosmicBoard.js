@@ -1,5 +1,5 @@
-// YB - 16-09-2026 Master Cosmic Board reactive composable coordinating engine, animations, powers, and gestures
-import { ref, reactive, computed } from 'vue';
+// YB - 16-09-2026 Master Cosmic Board reactive composable coordinating engine, animations, powers, screen shake, and cascades
+import { ref } from 'vue';
 import { BoardEngine, POWER_TYPES, COSMIC_TILE_TYPES } from '../engine/BoardEngine.js';
 
 export function useCosmicBoard(audioComposable, scoreComposable, missionComposable) {
@@ -9,8 +9,26 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
     const swappingState = ref(null); // { r1, c1, r2, c2, dx, dy, isReverting: boolean }
     const isBusy = ref(false); // Locks user input during animations
     const isReshuffling = ref(false);
+    const isCelebrating = ref(false); // Cosmic cascade / victory finale
     const activeCascades = ref(0);
     const activePowerEffects = ref([]); // Visual laser/vortex/explosion overlays
+    const screenShake = ref(null); // 'light' | 'medium' | 'heavy'
+
+    // YB - 16-09-2026 Deeply synchronize board engine state to Vue reactive ref
+    function syncGrid() {
+        if (!engine.value || !engine.value.grid) return;
+        grid.value = engine.value.grid.map(row => [...row]);
+    }
+
+    // YB - 16-09-2026 Trigger haptic screen shake effect
+    function triggerScreenShake(type = 'light') {
+        screenShake.value = type;
+        setTimeout(() => {
+            if (screenShake.value === type) {
+                screenShake.value = null;
+            }
+        }, 450);
+    }
 
     // YB - 16-09-2026 Initialize board for a level
     function setupBoard(levelData = null) {
@@ -19,7 +37,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         const tilePool = levelData?.available_tiles || COSMIC_TILE_TYPES;
 
         engine.value = new BoardEngine(rows, cols, tilePool);
-        grid.value = engine.value.initBoard();
+        engine.value.initBoard();
 
         // Seed obstacles if specified in levelData
         if (levelData?.obstacles) {
@@ -31,16 +49,20 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             }
         }
 
+        syncGrid();
+
         selectedTile.value = null;
         swappingState.value = null;
         isBusy.value = false;
+        isCelebrating.value = false;
         activeCascades.value = 0;
         activePowerEffects.value = [];
+        screenShake.value = null;
     }
 
     // YB - 16-09-2026 Handle tile selection via click or tap
     async function selectTile(row, col) {
-        if (isBusy.value || missionComposable.missionStatus.value !== 'in_progress') return;
+        if (isBusy.value || isCelebrating.value || missionComposable.missionStatus.value !== 'in_progress') return;
 
         const clickedTile = engine.value.getTile(row, col);
         if (!clickedTile || clickedTile.obstacle === 'rock' || clickedTile.obstacle === 'lock') return;
@@ -72,7 +94,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
 
     // YB - 16-09-2026 Handle swipe gesture from a starting cell
     async function handleSwipe(startRow, startCol, direction) {
-        if (isBusy.value || missionComposable.missionStatus.value !== 'in_progress') return;
+        if (isBusy.value || isCelebrating.value || missionComposable.missionStatus.value !== 'in_progress') return;
 
         let targetRow = startRow;
         let targetCol = startCol;
@@ -90,7 +112,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         await attemptSwap(startRow, startCol, targetRow, targetCol);
     }
 
-    // YB - 16-09-2026 Attempt swap between two adjacent cells with animated slide transition
+    // YB - 16-09-2026 Attempt swap between two adjacent cells with tactile animated slide transition
     async function attemptSwap(r1, c1, r2, c2) {
         isBusy.value = true;
         const tile1 = engine.value.getTile(r1, c1);
@@ -101,16 +123,17 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             return;
         }
 
-        // Trigger smooth sliding animation
+        // Trigger smooth sliding animation (slowed to 300ms for satisfying Candy Crush tactile feel)
         const dx = c2 - c1;
         const dy = r2 - r1;
         swappingState.value = { r1, c1, r2, c2, dx, dy, isReverting: false };
         audioComposable.playSwap();
-        await sleep(220); // CSS slide transition
+        await sleep(300);
 
         // Perform swap in engine
         engine.value.swap(r1, c1, r2, c2);
         swappingState.value = null;
+        syncGrid();
 
         // Power tile special activations
         const isPower1 = !!tile1.power;
@@ -120,7 +143,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             missionComposable.useMove();
             await handlePowerInteractions(r1, c1, r2, c2, tile1, tile2);
             await runCascadeLoop();
-            checkEndConditions();
+            await checkEndConditions();
             isBusy.value = false;
             return;
         }
@@ -132,20 +155,21 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             missionComposable.useMove();
             await processMatchesAndGravity(matchResult, { row: r2, col: c2 });
             await runCascadeLoop();
-            checkEndConditions();
+            await checkEndConditions();
         } else {
             // Invalid swap -> smoothly slide back
             audioComposable.playInvalid();
             swappingState.value = { r1: r2, c1: c2, r2: r1, c2: c1, dx: -dx, dy: -dy, isReverting: true };
-            await sleep(220);
+            await sleep(280);
             engine.value.swap(r2, c2, r1, c1); // Swap back
             swappingState.value = null;
+            syncGrid();
         }
 
         isBusy.value = false;
     }
 
-    // YB - 16-09-2026 Handle power tiles swap and combinations
+    // YB - 16-09-2026 Handle power tiles swap and combinations with rich visual effects
     async function handlePowerInteractions(r1, c1, r2, c2, tile1, tile2) {
         const clearedSet = new Set();
         const key = (r, c) => `${r},${c}`;
@@ -154,6 +178,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         if (tile1.power === POWER_TYPES.SUPERNOVA && tile2.power === POWER_TYPES.SUPERNOVA) {
             audioComposable.playSupernova();
             scoreComposable.addPowerActivationScore('combo', r2, c2);
+            triggerScreenShake('heavy');
             spawnPowerEffect('universal_burst', r2, c2);
 
             for (let r = 0; r < engine.value.rows; r++) {
@@ -170,21 +195,32 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             const nonSupernova = tile1.power === POWER_TYPES.SUPERNOVA ? tile2 : tile1;
             const targetColor = nonSupernova.type;
             audioComposable.playSupernova();
-            spawnPowerEffect('supernova', r2, c2);
+            triggerScreenShake('heavy');
 
-            clearedSet.add(key(r1, c1));
-            clearedSet.add(key(r2, c2));
-
-            // Convert and trigger
+            // Find all matching color targets for lightning arcs
+            const targets = [];
             for (let r = 0; r < engine.value.rows; r++) {
                 for (let c = 0; c < engine.value.cols; c++) {
                     const t = engine.value.getTile(r, c);
                     if (t && t.type === targetColor) {
-                        clearedSet.add(key(r, c));
-                        // Trigger column or row clear
-                        triggerCometClear(r, c, Math.random() > 0.5 ? POWER_TYPES.COMET_H : POWER_TYPES.COMET_V, clearedSet);
+                        targets.push({ row: r, col: c });
                     }
                 }
+            }
+
+            spawnPowerEffect('supernova', r2, c2, { targets, targetColor });
+
+            clearedSet.add(key(r1, c1));
+            clearedSet.add(key(r2, c2));
+
+            await sleep(400);
+
+            // Convert and trigger all matching tiles into comets
+            for (const tgt of targets) {
+                clearedSet.add(key(tgt.row, tgt.col));
+                const pType = Math.random() > 0.5 ? POWER_TYPES.COMET_H : POWER_TYPES.COMET_V;
+                triggerCometClear(tgt.row, tgt.col, pType, clearedSet);
+                spawnPowerEffect(pType === POWER_TYPES.COMET_H ? 'laser_h' : 'laser_v', tgt.row, tgt.col);
             }
         }
         // Comet + Comet: Meteor Storm (Clears entire row AND entire column)
@@ -194,6 +230,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         ) {
             audioComposable.playComet();
             scoreComposable.addPowerActivationScore('combo', r2, c2);
+            triggerScreenShake('light');
             spawnPowerEffect('laser_cross', r2, c2);
 
             triggerCometClear(r2, c2, POWER_TYPES.COMET_H, clearedSet);
@@ -206,7 +243,8 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         ) {
             audioComposable.playBlackHole();
             scoreComposable.addPowerActivationScore('combo', r2, c2);
-            spawnPowerEffect('vortex_storm', r2, c2);
+            triggerScreenShake('medium');
+            spawnPowerEffect('vortex_storm', r2, c2, { radius: 2 });
 
             for (let offset = -1; offset <= 1; offset++) {
                 const tr = Math.max(0, Math.min(engine.value.rows - 1, r2 + offset));
@@ -219,7 +257,8 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         else if (tile1.power === POWER_TYPES.BLACK_HOLE && tile2.power === POWER_TYPES.BLACK_HOLE) {
             audioComposable.playBlackHole();
             scoreComposable.addPowerActivationScore('combo', r2, c2);
-            spawnPowerEffect('vortex_storm', r2, c2);
+            triggerScreenShake('heavy');
+            spawnPowerEffect('vortex_storm', r2, c2, { radius: 2 });
 
             for (let dr = -2; dr <= 2; dr++) {
                 for (let dc = -2; dc <= 2; dc++) {
@@ -238,19 +277,24 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
 
             audioComposable.playSupernova();
             scoreComposable.addPowerActivationScore('supernova', r2, c2);
-            spawnPowerEffect('supernova', r2, c2);
+            triggerScreenShake('medium');
 
-            clearedSet.add(key(r1, c1));
-            clearedSet.add(key(r2, c2));
-
+            const targets = [];
             for (let r = 0; r < engine.value.rows; r++) {
                 for (let c = 0; c < engine.value.cols; c++) {
                     const t = engine.value.getTile(r, c);
                     if (t && t.type === targetColor) {
+                        targets.push({ row: r, col: c });
                         clearedSet.add(key(r, c));
                     }
                 }
             }
+
+            spawnPowerEffect('supernova', r2, c2, { targets, targetColor });
+            clearedSet.add(key(r1, c1));
+            clearedSet.add(key(r2, c2));
+
+            await sleep(450);
         }
         // Single power tile trigger
         else {
@@ -264,15 +308,25 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             return { row: r, col: c, tile: engine.value.getTile(r, c) };
         });
 
+        // Visually mark matched tiles
+        for (const item of clearedCoords) {
+            if (item.tile) item.tile.isMatched = true;
+        }
+        syncGrid();
+        await sleep(320); // Allow pop animation to complete
+
         // Notify mission of tile clears and break adjacent ice
         missionComposable.recordTileClears(clearedCoords);
         breakAdjacentIce(clearedCoords);
 
         engine.value.clearTiles(clearedCoords);
-        await sleep(280);
+        syncGrid();
+        await sleep(80);
 
         engine.value.applyGravityAndRefill();
-        await sleep(220);
+        syncGrid();
+        await sleep(340); // Allow tiles to drop and settle
+        await sleep(260); // Cadence pause
     }
 
     // YB - 16-09-2026 Trigger single power tile effect
@@ -283,11 +337,13 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         if (powerType === POWER_TYPES.COMET_H || powerType === POWER_TYPES.COMET_V) {
             audioComposable.playComet();
             scoreComposable.addPowerActivationScore('comet', row, col);
+            triggerScreenShake('light');
             spawnPowerEffect(powerType === POWER_TYPES.COMET_H ? 'laser_h' : 'laser_v', row, col);
             triggerCometClear(row, col, powerType, clearedSet);
         } else if (powerType === POWER_TYPES.BLACK_HOLE) {
             audioComposable.playBlackHole();
             scoreComposable.addPowerActivationScore('black_hole', row, col);
+            triggerScreenShake('medium');
             spawnPowerEffect('black_hole', row, col);
 
             // Clear 3x3 surrounding
@@ -317,14 +373,31 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         }
     }
 
-    // YB - 16-09-2026 Process match clearing, power creation, and gravity drop
+    // YB - 16-09-2026 Process match clearing, power creation, gravity drop, and state synchronization
     async function processMatchesAndGravity(matchResult, focusCoord = null) {
         const { clearedCoords, powersToSpawn } = engine.value.resolveMatches(matchResult.matches, focusCoord);
 
-        // Visual match flagging
+        // Check if any matched tile detonates a power
+        for (const item of clearedCoords) {
+            if (item.tile?.power) {
+                if (item.tile.power === POWER_TYPES.COMET_H) {
+                    spawnPowerEffect('laser_h', item.row, item.col);
+                    triggerScreenShake('light');
+                } else if (item.tile.power === POWER_TYPES.COMET_V) {
+                    spawnPowerEffect('laser_v', item.row, item.col);
+                    triggerScreenShake('light');
+                } else if (item.tile.power === POWER_TYPES.BLACK_HOLE) {
+                    spawnPowerEffect('black_hole', item.row, item.col);
+                    triggerScreenShake('medium');
+                }
+            }
+        }
+
+        // Step 1: Visual match flagging
         for (const item of clearedCoords) {
             if (item.tile) item.tile.isMatched = true;
         }
+        syncGrid();
 
         audioComposable.playMatch(activeCascades.value);
 
@@ -344,6 +417,13 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
 
         for (const p of powersToSpawn) {
             scoreComposable.addPowerCreatedScore(p.row, p.col);
+            if (p.power === POWER_TYPES.COMET_H || p.power === POWER_TYPES.COMET_V) {
+                spawnPowerEffect(p.power === POWER_TYPES.COMET_H ? 'laser_h' : 'laser_v', p.row, p.col);
+            } else if (p.power === POWER_TYPES.BLACK_HOLE) {
+                spawnPowerEffect('black_hole', p.row, p.col);
+            } else if (p.power === POWER_TYPES.SUPERNOVA) {
+                spawnPowerEffect('supernova', p.row, p.col);
+            }
         }
 
         missionComposable.updateScoreObjective(scoreComposable.currentScore.value);
@@ -351,13 +431,23 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             scoreComposable.updateStars(missionComposable.activeLevel.value.star_thresholds);
         }
 
-        await sleep(250);
+        // Step 2: Pop animation pause (320ms so player sees the burst)
+        await sleep(320);
 
+        // Step 3: Clear tiles in engine and spawn created special powers
         engine.value.clearTiles(clearedCoords, powersToSpawn);
-        await sleep(60);
+        syncGrid();
+        await sleep(80);
 
+        // Step 4: Apply gravity drop & column refills
         engine.value.applyGravityAndRefill();
-        await sleep(220);
+        syncGrid();
+
+        // Step 5: Allow falling tiles to settle smoothly
+        await sleep(340);
+
+        // Step 6: Cadence pause allowing player eye to register new board state
+        await sleep(260);
     }
 
     // YB - 16-09-2026 Break cosmic ice on cells adjacent to cleared tiles
@@ -381,7 +471,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
     // YB - 16-09-2026 Run cascade loop continuously until board reaches equilibrium
     async function runCascadeLoop() {
         let cascadeCount = 0;
-        const MAX_CASCADES = 20;
+        const MAX_CASCADES = 25;
 
         while (cascadeCount < MAX_CASCADES) {
             const nextMatches = engine.value.findMatches();
@@ -395,49 +485,150 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         activeCascades.value = 0;
     }
 
-    // YB - 16-09-2026 Check for win/loss conditions and deadlock detection
-    function checkEndConditions() {
-        const status = missionComposable.checkMissionStatus();
+    // YB - 16-09-2026 Check for win/loss conditions and run celebratory Cosmic Burst finale
+    async function checkEndConditions() {
+        const areObjectivesMet = missionComposable.checkObjectivesMet();
 
-        if (status === 'completed') {
-            audioComposable.playVictory();
-            // Remaining moves bonus
-            scoreComposable.addRemainingMovesBonus(missionComposable.movesRemaining.value);
-            missionComposable.updateScoreObjective(scoreComposable.currentScore.value);
-            if (missionComposable.activeLevel.value?.star_thresholds) {
-                scoreComposable.updateStars(missionComposable.activeLevel.value.star_thresholds);
-            }
+        if (areObjectivesMet) {
+            // Player met all level objectives! Run "Cosmic Burst" / Sugar Crush finale!
+            await runCosmicBurstCelebration();
             return;
         }
 
-        if (status === 'failed') {
+        if (missionComposable.movesRemaining.value <= 0) {
             audioComposable.playFailed();
+            missionComposable.checkMissionStatus(); // Will mark failed
             return;
         }
 
         // Check if deadlock exists
         if (!engine.value.hasPossibleMoves()) {
-            handleDeadlock();
+            await handleDeadlock();
         }
+    }
+
+    // YB - 16-09-2026 Run celebratory Sugar Crush / Cosmic Cascade finale when level is won
+    async function runCosmicBurstCelebration() {
+        isBusy.value = true;
+        isCelebrating.value = true;
+
+        // Finish any ongoing cascades first
+        await runCascadeLoop();
+
+        // If player has remaining moves, convert each into a special cosmic power and detonate!
+        const remainingMoves = missionComposable.movesRemaining.value;
+
+        if (remainingMoves > 0) {
+            const convertedCoords = [];
+
+            // Convert remaining moves one-by-one with celebratory sparkle
+            while (missionComposable.movesRemaining.value > 0) {
+                missionComposable.movesRemaining.value--;
+
+                // Find a random normal tile on the board
+                const candidates = [];
+                for (let r = 0; r < engine.value.rows; r++) {
+                    for (let c = 0; c < engine.value.cols; c++) {
+                        const tile = engine.value.getTile(r, c);
+                        if (tile && !tile.power && !tile.obstacle) {
+                            candidates.push({ row: r, col: c });
+                        }
+                    }
+                }
+
+                if (candidates.length > 0) {
+                    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+                    const chosenPower = Math.random() > 0.4 ? (Math.random() > 0.5 ? POWER_TYPES.COMET_H : POWER_TYPES.COMET_V) : POWER_TYPES.BLACK_HOLE;
+
+                    const cell = engine.value.getTile(pick.row, pick.col);
+                    if (cell) {
+                        cell.power = chosenPower;
+                        convertedCoords.push(pick);
+                        audioComposable.playSwap();
+                        syncGrid();
+                    }
+                }
+
+                await sleep(200);
+            }
+
+            // Tally remaining moves bonus
+            scoreComposable.addRemainingMovesBonus(remainingMoves);
+            missionComposable.updateScoreObjective(scoreComposable.currentScore.value);
+            if (missionComposable.activeLevel.value?.star_thresholds) {
+                scoreComposable.updateStars(missionComposable.activeLevel.value.star_thresholds);
+            }
+
+            await sleep(400);
+
+            // Detonate all newly created special powers in an epic cascade
+            for (const coord of convertedCoords) {
+                const cell = engine.value.getTile(coord.row, coord.col);
+                if (cell && cell.power) {
+                    const clearedSet = new Set();
+                    activateSinglePower(coord.row, coord.col, cell.power, clearedSet);
+
+                    const clearedCoords = Array.from(clearedSet).map(k => {
+                        const [r, c] = k.split(',').map(Number);
+                        return { row: r, col: c, tile: engine.value.getTile(r, c) };
+                    });
+
+                    engine.value.clearTiles(clearedCoords);
+                    syncGrid();
+                    await sleep(150);
+
+                    engine.value.applyGravityAndRefill();
+                    syncGrid();
+                    await sleep(250);
+                }
+            }
+
+            // Let any cascades triggered by detonated powers finish
+            await runCascadeLoop();
+        }
+
+        // Finalize score and stars
+        missionComposable.updateScoreObjective(scoreComposable.currentScore.value);
+        if (missionComposable.activeLevel.value?.star_thresholds) {
+            scoreComposable.updateStars(missionComposable.activeLevel.value.star_thresholds);
+        }
+
+        audioComposable.playVictory();
+
+        // 1.5 second victory celebration delay before modal appears
+        await sleep(1500);
+
+        missionComposable.finalizeMissionSuccess();
+        isCelebrating.value = false;
+        isBusy.value = false;
     }
 
     // YB - 16-09-2026 Reshuffle board upon deadlock detection
     async function handleDeadlock() {
         isReshuffling.value = true;
-        await sleep(300);
+        await sleep(350);
         engine.value.reshuffle();
-        await sleep(400);
+        syncGrid();
+        await sleep(450);
         isReshuffling.value = false;
     }
 
     // YB - 16-09-2026 Add transient visual effect for power activations
-    function spawnPowerEffect(type, row, col) {
+    function spawnPowerEffect(type, row, col, extra = {}) {
         const id = `fx_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-        activePowerEffects.value.push({ id, type, row, col });
+        activePowerEffects.value.push({
+            id,
+            type,
+            row,
+            col,
+            ...extra
+        });
+
+        const duration = extra.duration || (type === 'supernova' || type === 'universal_burst' ? 1100 : 700);
 
         setTimeout(() => {
             activePowerEffects.value = activePowerEffects.value.filter(fx => fx.id !== id);
-        }, 600);
+        }, duration);
     }
 
     // YB - 16-09-2026 Helper promise delay
@@ -452,10 +643,13 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         swappingState,
         isBusy,
         isReshuffling,
+        isCelebrating,
         activeCascades,
         activePowerEffects,
+        screenShake,
         setupBoard,
         selectTile,
         handleSwipe,
+        syncGrid,
     };
 }

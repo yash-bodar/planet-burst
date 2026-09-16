@@ -77,15 +77,20 @@ export function useMission() {
         checkMissionStatus();
     }
 
+    // YB - 16-09-2026 Check whether all objectives are fulfilled without prematurely locking modals
+    function checkObjectivesMet() {
+        return objectives.value.length > 0 && objectives.value.every(obj => obj.isCompleted);
+    }
+
     // YB - 16-09-2026 Check whether all objectives are fulfilled or moves depleted
     function checkMissionStatus() {
         if (missionStatus.value !== 'in_progress') return missionStatus.value;
 
-        const allObjectivesDone = objectives.value.every(obj => obj.isCompleted);
+        const allDone = checkObjectivesMet();
 
-        if (allObjectivesDone) {
-            missionStatus.value = 'completed';
-            return 'completed';
+        if (allDone) {
+            // Objectives completed! Board engine will run cosmic cascade bonus before final modal
+            return 'objectives_met';
         }
 
         if (movesRemaining.value <= 0) {
@@ -94,6 +99,11 @@ export function useMission() {
         }
 
         return 'in_progress';
+    }
+
+    // YB - 16-09-2026 Finalize mission completion after animations and bonus tally complete
+    function finalizeMissionSuccess() {
+        missionStatus.value = 'completed';
     }
 
     const allObjectivesMet = computed(() => {
@@ -113,5 +123,7 @@ export function useMission() {
         recordObstacleClear,
         updateScoreObjective,
         checkMissionStatus,
+        checkObjectivesMet,
+        finalizeMissionSuccess,
     };
 }
