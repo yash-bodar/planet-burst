@@ -6,6 +6,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
     const engine = ref(new BoardEngine());
     const grid = ref([]);
     const selectedTile = ref(null);
+    const swappingState = ref(null); // { r1, c1, r2, c2, dx, dy, isReverting: boolean }
     const isBusy = ref(false); // Locks user input during animations
     const isReshuffling = ref(false);
     const activeCascades = ref(0);
@@ -31,6 +32,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         }
 
         selectedTile.value = null;
+        swappingState.value = null;
         isBusy.value = false;
         activeCascades.value = 0;
         activePowerEffects.value = [];
@@ -88,7 +90,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         await attemptSwap(startRow, startCol, targetRow, targetCol);
     }
 
-    // YB - 16-09-2026 Attempt swap between two adjacent cells, handle powers and rollback if invalid
+    // YB - 16-09-2026 Attempt swap between two adjacent cells with animated slide transition
     async function attemptSwap(r1, c1, r2, c2) {
         isBusy.value = true;
         const tile1 = engine.value.getTile(r1, c1);
@@ -99,8 +101,16 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             return;
         }
 
+        // Trigger smooth sliding animation
+        const dx = c2 - c1;
+        const dy = r2 - r1;
+        swappingState.value = { r1, c1, r2, c2, dx, dy, isReverting: false };
         audioComposable.playSwap();
+        await sleep(220); // CSS slide transition
+
+        // Perform swap in engine
         engine.value.swap(r1, c1, r2, c2);
+        swappingState.value = null;
 
         // Power tile special activations
         const isPower1 = !!tile1.power;
@@ -124,10 +134,12 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             await runCascadeLoop();
             checkEndConditions();
         } else {
-            // Invalid swap -> play bump and rollback
+            // Invalid swap -> smoothly slide back
             audioComposable.playInvalid();
-            await sleep(250);
+            swappingState.value = { r1: r2, c1: c2, r2: r1, c2: c1, dx: -dx, dy: -dy, isReverting: true };
+            await sleep(220);
             engine.value.swap(r2, c2, r1, c1); // Swap back
+            swappingState.value = null;
         }
 
         isBusy.value = false;
@@ -201,6 +213,22 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
                 const tc = Math.max(0, Math.min(engine.value.cols - 1, c2 + offset));
                 triggerCometClear(tr, tc, POWER_TYPES.COMET_H, clearedSet);
                 triggerCometClear(tr, tc, POWER_TYPES.COMET_V, clearedSet);
+            }
+        }
+        // Bomb + Bomb: Mega Supermassive Singularity (Massive 5x5 explosion)
+        else if (tile1.power === POWER_TYPES.BLACK_HOLE && tile2.power === POWER_TYPES.BLACK_HOLE) {
+            audioComposable.playBlackHole();
+            scoreComposable.addPowerActivationScore('combo', r2, c2);
+            spawnPowerEffect('vortex_storm', r2, c2);
+
+            for (let dr = -2; dr <= 2; dr++) {
+                for (let dc = -2; dc <= 2; dc++) {
+                    const nr = r2 + dr;
+                    const nc = c2 + dc;
+                    if (nr >= 0 && nr < engine.value.rows && nc >= 0 && nc < engine.value.cols) {
+                        clearedSet.add(key(nr, nc));
+                    }
+                }
             }
         }
         // Single Supernova with normal tile: Clears all of that cosmic type
@@ -421,6 +449,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         engine,
         grid,
         selectedTile,
+        swappingState,
         isBusy,
         isReshuffling,
         activeCascades,

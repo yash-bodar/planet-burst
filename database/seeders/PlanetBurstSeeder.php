@@ -11,409 +11,244 @@ class PlanetBurstSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * // YB - 16-09-2026 Seed initial celestial worlds and 18 missions for Planet Burst
+     * // YB - 16-09-2026 Seed 10 celestial worlds and 100 progressive missions for Planet Burst
      */
     public function run(): void
     {
-        $worldsData = [
+        $worldConfigs = [
             [
                 'order' => 1,
                 'name' => 'Earth Orbit',
                 'icon' => '🌍',
-                'description' => 'Atmospheric boundary with tranquil cosmic radiation.',
+                'description' => 'Atmospheric boundary with calm cosmic rays. Perfect sector for flight training.',
                 'background_theme' => 'earth',
-                'levels' => [
-                    [
-                        'level_number' => 1,
-                        'title' => 'Sector Alpha',
-                        'difficulty' => 'easy',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 25,
-                        'target_score' => 3000,
-                        'star_thresholds' => [3000, 6000, 9000],
-                        'objectives' => [['type' => 'score', 'target' => 3000]],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby'],
-                        'obstacles' => null,
-                    ],
-                    [
-                        'level_number' => 2,
-                        'title' => 'Terra Horizon',
-                        'difficulty' => 'easy',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 22,
-                        'target_score' => 4000,
-                        'star_thresholds' => [4000, 7500, 11000],
-                        'objectives' => [['type' => 'collect_tile', 'target' => 18, 'tileType' => 'planet_cyan']],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby'],
-                        'obstacles' => null,
-                    ],
-                    [
-                        'level_number' => 3,
-                        'title' => 'Satellite Highway',
-                        'difficulty' => 'medium',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 20,
-                        'target_score' => 5000,
-                        'star_thresholds' => [5000, 9000, 13000],
-                        'objectives' => [
-                            ['type' => 'score', 'target' => 5000],
-                            ['type' => 'collect_tile', 'target' => 15, 'tileType' => 'planet_amber'],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice'],
-                        'obstacles' => null,
-                    ],
-                ],
             ],
             [
                 'order' => 2,
                 'name' => 'Lunar Base',
                 'icon' => '🌙',
-                'description' => 'Craters veiled in frozen interstellar frost.',
+                'description' => 'Craters and shadowed valleys encased in persistent interstellar frost.',
                 'background_theme' => 'moon',
-                'levels' => [
-                    [
-                        'level_number' => 4,
-                        'title' => 'Tranquility Frost',
-                        'difficulty' => 'medium',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 24,
-                        'target_score' => 4500,
-                        'star_thresholds' => [4500, 8000, 12000],
-                        'objectives' => [['type' => 'clear_ice', 'target' => 8]],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice'],
-                        'obstacles' => [
-                            ['row' => 3, 'col' => 3, 'type' => 'ice'],
-                            ['row' => 3, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 3, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 2, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 2, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 5, 'type' => 'ice'],
-                        ],
-                    ],
-                    [
-                        'level_number' => 5,
-                        'title' => 'Crater Basin',
-                        'difficulty' => 'medium',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 22,
-                        'target_score' => 5500,
-                        'star_thresholds' => [5500, 9500, 14000],
-                        'objectives' => [
-                            ['type' => 'collect_tile', 'target' => 20, 'tileType' => 'planet_ice'],
-                            ['type' => 'clear_ice', 'target' => 6],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ice', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 3, 'col' => 2, 'type' => 'ice'],
-                            ['row' => 3, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 2, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 1, 'col' => 3, 'type' => 'ice'],
-                            ['row' => 6, 'col' => 4, 'type' => 'ice'],
-                        ],
-                    ],
-                    [
-                        'level_number' => 6,
-                        'title' => 'Eclipse Terminal',
-                        'difficulty' => 'hard',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 20,
-                        'target_score' => 7000,
-                        'star_thresholds' => [7000, 12000, 17000],
-                        'objectives' => [
-                            ['type' => 'score', 'target' => 7000],
-                            ['type' => 'collect_tile', 'target' => 22, 'tileType' => 'planet_purple'],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                        'obstacles' => null,
-                    ],
-                ],
             ],
             [
                 'order' => 3,
                 'name' => 'Mars Ridge',
                 'icon' => '🔴',
-                'description' => 'Red basalt cliffs with magnetic flux locks.',
+                'description' => 'Red iron valleys with erratic gravitational locks and volcanic dust.',
                 'background_theme' => 'mars',
-                'levels' => [
-                    [
-                        'level_number' => 7,
-                        'title' => 'Olympus Ascent',
-                        'difficulty' => 'medium',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 23,
-                        'target_score' => 6000,
-                        'star_thresholds' => [6000, 10000, 15000],
-                        'objectives' => [['type' => 'collect_tile', 'target' => 24, 'tileType' => 'planet_ruby']],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_ruby', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 0, 'col' => 0, 'type' => 'lock'],
-                            ['row' => 0, 'col' => 7, 'type' => 'lock'],
-                            ['row' => 7, 'col' => 0, 'type' => 'lock'],
-                            ['row' => 7, 'col' => 7, 'type' => 'lock'],
-                        ],
-                    ],
-                    [
-                        'level_number' => 8,
-                        'title' => 'Dust Valley',
-                        'difficulty' => 'hard',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 20,
-                        'target_score' => 7500,
-                        'star_thresholds' => [7500, 13000, 18000],
-                        'objectives' => [
-                            ['type' => 'score', 'target' => 7500],
-                            ['type' => 'collect_tile', 'target' => 16, 'tileType' => 'planet_solar'],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_purple', 'planet_ruby', 'planet_solar', 'planet_ice'],
-                        'obstacles' => null,
-                    ],
-                    [
-                        'level_number' => 9,
-                        'title' => 'Valles Marineris',
-                        'difficulty' => 'hard',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 22,
-                        'target_score' => 8000,
-                        'star_thresholds' => [8000, 14000, 20000],
-                        'objectives' => [
-                            ['type' => 'clear_ice', 'target' => 10],
-                            ['type' => 'collect_tile', 'target' => 20, 'tileType' => 'planet_ruby'],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 2, 'col' => 2, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 3, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 2, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 3, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 3, 'col' => 3, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 4, 'type' => 'ice'],
-                        ],
-                    ],
-                ],
             ],
             [
                 'order' => 4,
                 'name' => 'Jupiter Storm',
                 'icon' => '🟠',
-                'description' => 'Vast swirling storms and dense asteroid belts.',
+                'description' => 'Great atmospheric vortices and jagged stray meteoroid belts.',
                 'background_theme' => 'jupiter',
-                'levels' => [
-                    [
-                        'level_number' => 10,
-                        'title' => 'Great Red Eye',
-                        'difficulty' => 'hard',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 22,
-                        'target_score' => 9000,
-                        'star_thresholds' => [9000, 15000, 22000],
-                        'objectives' => [['type' => 'score', 'target' => 9000]],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 3, 'col' => 3, 'type' => 'rock'],
-                            ['row' => 4, 'col' => 4, 'type' => 'rock'],
-                        ],
-                    ],
-                    [
-                        'level_number' => 11,
-                        'title' => 'Atmospheric Vortex',
-                        'difficulty' => 'hard',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 20,
-                        'target_score' => 9500,
-                        'star_thresholds' => [9500, 16000, 24000],
-                        'objectives' => [
-                            ['type' => 'collect_tile', 'target' => 25, 'tileType' => 'planet_amber'],
-                            ['type' => 'collect_tile', 'target' => 25, 'tileType' => 'planet_solar'],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_solar'],
-                        'obstacles' => null,
-                    ],
-                    [
-                        'level_number' => 12,
-                        'title' => 'Europa Crossing',
-                        'difficulty' => 'expert',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 18,
-                        'target_score' => 10000,
-                        'star_thresholds' => [10000, 18000, 26000],
-                        'objectives' => [['type' => 'clear_ice', 'target' => 12]],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_ice', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 1, 'col' => 1, 'type' => 'ice'], ['row' => 1, 'col' => 6, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 2, 'type' => 'ice'], ['row' => 2, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 3, 'col' => 3, 'type' => 'ice'], ['row' => 3, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 3, 'type' => 'ice'], ['row' => 4, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 2, 'type' => 'ice'], ['row' => 5, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 6, 'col' => 1, 'type' => 'ice'], ['row' => 6, 'col' => 6, 'type' => 'ice'],
-                        ],
-                    ],
-                ],
             ],
             [
                 'order' => 5,
                 'name' => 'Saturn Rings',
                 'icon' => '💍',
-                'description' => 'Glistening ring arcs composed of celestial crystals.',
+                'description' => 'Glistening crystalline rings composed of frozen celestial shards.',
                 'background_theme' => 'saturn',
-                'levels' => [
-                    [
-                        'level_number' => 13,
-                        'title' => 'Cassini Division',
-                        'difficulty' => 'hard',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 22,
-                        'target_score' => 10000,
-                        'star_thresholds' => [10000, 17000, 25000],
-                        'objectives' => [['type' => 'collect_tile', 'target' => 30, 'tileType' => 'planet_purple']],
-                        'available_tiles' => ['planet_amber', 'planet_purple', 'planet_ice', 'planet_solar'],
-                        'obstacles' => null,
-                    ],
-                    [
-                        'level_number' => 14,
-                        'title' => 'Titan Outpost',
-                        'difficulty' => 'expert',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 20,
-                        'target_score' => 11000,
-                        'star_thresholds' => [11000, 19000, 28000],
-                        'objectives' => [
-                            ['type' => 'score', 'target' => 11000],
-                            ['type' => 'clear_ice', 'target' => 8],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ice', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 2, 'col' => 3, 'type' => 'ice'], ['row' => 2, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 3, 'col' => 2, 'type' => 'ice'], ['row' => 3, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 2, 'type' => 'ice'], ['row' => 4, 'col' => 5, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 3, 'type' => 'ice'], ['row' => 5, 'col' => 4, 'type' => 'ice'],
-                        ],
-                    ],
-                    [
-                        'level_number' => 15,
-                        'title' => 'Enceladus Cryo-Geyser',
-                        'difficulty' => 'expert',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 18,
-                        'target_score' => 12000,
-                        'star_thresholds' => [12000, 20000, 30000],
-                        'objectives' => [
-                            ['type' => 'collect_tile', 'target' => 25, 'tileType' => 'planet_ice'],
-                            ['type' => 'collect_tile', 'target' => 25, 'tileType' => 'planet_cyan'],
-                        ],
-                        'available_tiles' => ['planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                        'obstacles' => null,
-                    ],
-                ],
             ],
             [
                 'order' => 6,
-                'name' => 'Deep Cosmos',
-                'icon' => '🌌',
-                'description' => 'The edge of chartered space approaching a supermassive anomaly.',
-                'background_theme' => 'cosmos',
-                'levels' => [
-                    [
-                        'level_number' => 16,
-                        'title' => 'Nebula Nexus',
-                        'difficulty' => 'expert',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 22,
-                        'target_score' => 13000,
-                        'star_thresholds' => [13000, 22000, 32000],
-                        'objectives' => [['type' => 'score', 'target' => 13000]],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                        'obstacles' => null,
-                    ],
-                    [
-                        'level_number' => 17,
-                        'title' => 'Event Horizon',
-                        'difficulty' => 'expert',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 20,
-                        'target_score' => 14000,
-                        'star_thresholds' => [14000, 24000, 35000],
-                        'objectives' => [
-                            ['type' => 'clear_ice', 'target' => 12],
-                            ['type' => 'collect_tile', 'target' => 20, 'tileType' => 'planet_ruby'],
-                        ],
-                        'available_tiles' => ['planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 0, 'col' => 0, 'type' => 'ice'], ['row' => 0, 'col' => 7, 'type' => 'ice'],
-                            ['row' => 7, 'col' => 0, 'type' => 'ice'], ['row' => 7, 'col' => 7, 'type' => 'ice'],
-                            ['row' => 3, 'col' => 3, 'type' => 'ice'], ['row' => 3, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 4, 'col' => 3, 'type' => 'ice'], ['row' => 4, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 2, 'col' => 3, 'type' => 'ice'], ['row' => 2, 'col' => 4, 'type' => 'ice'],
-                            ['row' => 5, 'col' => 3, 'type' => 'ice'], ['row' => 5, 'col' => 4, 'type' => 'ice'],
-                        ],
-                    ],
-                    [
-                        'level_number' => 18,
-                        'title' => 'Singularity Burst',
-                        'difficulty' => 'master',
-                        'rows' => 8,
-                        'columns' => 8,
-                        'move_limit' => 18,
-                        'target_score' => 16000,
-                        'star_thresholds' => [16000, 28000, 40000],
-                        'objectives' => [
-                            ['type' => 'score', 'target' => 16000],
-                            ['type' => 'collect_tile', 'target' => 30, 'tileType' => 'planet_solar'],
-                        ],
-                        'available_tiles' => ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                        'obstacles' => [
-                            ['row' => 2, 'col' => 2, 'type' => 'rock'],
-                            ['row' => 2, 'col' => 5, 'type' => 'rock'],
-                            ['row' => 5, 'col' => 2, 'type' => 'rock'],
-                            ['row' => 5, 'col' => 5, 'type' => 'rock'],
-                        ],
-                    ],
-                ],
+                'name' => 'Neptune Abyss',
+                'icon' => '🔵',
+                'description' => 'Supersonic planetary winds and deep azure methane oceans.',
+                'background_theme' => 'neptune',
+            ],
+            [
+                'order' => 7,
+                'name' => 'Solar Core',
+                'icon' => '☀️',
+                'description' => 'High-energy coronal loops and intense magnetic flares.',
+                'background_theme' => 'sun',
+            ],
+            [
+                'order' => 8,
+                'name' => 'Nebula Nexus',
+                'icon' => '🟣',
+                'description' => 'Prismatic stellar nursery where newborn cosmic powers form.',
+                'background_theme' => 'nebula',
+            ],
+            [
+                'order' => 9,
+                'name' => 'Asteroid Belt',
+                'icon' => '☄️',
+                'description' => 'Treacherous orbital field of solid asteroids and energy barriers.',
+                'background_theme' => 'asteroid',
+            ],
+            [
+                'order' => 10,
+                'name' => 'Event Horizon',
+                'icon' => '🕳️',
+                'description' => 'The ultimate sector at the brink of an ancient supermassive singularity.',
+                'background_theme' => 'singularity',
             ],
         ];
 
-        foreach ($worldsData as $wData) {
-            $levels = $wData['levels'];
-            unset($wData['levels']);
+        $tilePools = [
+            ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby'],
+            ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice'],
+            ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
+        ];
 
+        $levelCounter = 1;
+
+        foreach ($worldConfigs as $wConfig) {
             $world = PlanetBurstWorld::updateOrCreate(
-                ['order' => $wData['order']],
-                $wData
+                ['order' => $wConfig['order']],
+                [
+                    'name' => $wConfig['name'],
+                    'icon' => $wConfig['icon'],
+                    'description' => $wConfig['description'],
+                    'background_theme' => $wConfig['background_theme'],
+                ]
             );
 
-            foreach ($levels as $lData) {
-                $lData['world_id'] = $world->id;
+            // Seed 10 levels per world = 100 total levels
+            for ($i = 1; $i <= 10; $i++) {
+                $lvlNum = $levelCounter++;
+                $difficulty = $this->determineDifficulty($lvlNum);
+                $tiles = $lvlNum <= 10 ? $tilePools[0] : ($lvlNum <= 40 ? $tilePools[1] : $tilePools[2]);
+                $moveLimit = max(15, 28 - (int) ($lvlNum / 10));
+                $targetScore = 2500 + ($lvlNum * 350);
+
+                $starThresholds = [
+                    $targetScore,
+                    (int) ($targetScore * 1.6),
+                    (int) ($targetScore * 2.3),
+                ];
+
+                $objectives = $this->generateObjectives($lvlNum, $targetScore, $tiles);
+                $obstacles = $this->generateObstacles($lvlNum);
+
                 PlanetBurstLevel::updateOrCreate(
                     [
                         'world_id' => $world->id,
-                        'level_number' => $lData['level_number'],
+                        'level_number' => $lvlNum,
                     ],
-                    $lData
+                    [
+                        'title' => "{$wConfig['name']} - Sector {$i}",
+                        'difficulty' => $difficulty,
+                        'rows' => 8,
+                        'columns' => 8,
+                        'move_limit' => $moveLimit,
+                        'target_score' => $targetScore,
+                        'star_thresholds' => $starThresholds,
+                        'objectives' => $objectives,
+                        'available_tiles' => $tiles,
+                        'obstacles' => $obstacles,
+                        'is_active' => true,
+                    ]
                 );
             }
         }
+    }
+
+    /**
+     * Determine difficulty based on level number progression.
+     *
+     * // YB - 16-09-2026 Map level progression number to difficulty label
+     */
+    protected function determineDifficulty(int $levelNumber): string
+    {
+        if ($levelNumber <= 15) return 'easy';
+        if ($levelNumber <= 40) return 'medium';
+        if ($levelNumber <= 70) return 'hard';
+        if ($levelNumber <= 90) return 'expert';
+        return 'master';
+    }
+
+    /**
+     * Generate dynamic and varied objectives for a level.
+     *
+     * // YB - 16-09-2026 Procedurally create diverse mission objectives
+     */
+    protected function generateObjectives(int $levelNum, int $targetScore, array $tiles): array
+    {
+        $typeMod = $levelNum % 4;
+
+        if ($typeMod === 1) {
+            // Pure Score Objective
+            return [
+                ['type' => 'score', 'target' => $targetScore],
+            ];
+        }
+
+        if ($typeMod === 2) {
+            // Collect single color tile
+            $chosenTile = $tiles[$levelNum % count($tiles)];
+            $targetCount = 15 + (int) ($levelNum / 5);
+            return [
+                ['type' => 'collect_tile', 'target' => $targetCount, 'tileType' => $chosenTile],
+            ];
+        }
+
+        if ($typeMod === 3) {
+            // Ice clearing + score
+            $iceTarget = min(18, 6 + (int) ($levelNum / 8));
+            return [
+                ['type' => 'clear_ice', 'target' => $iceTarget],
+                ['type' => 'score', 'target' => (int) ($targetScore * 0.8)],
+            ];
+        }
+
+        // Dual collection objective
+        $tile1 = $tiles[0];
+        $tile2 = $tiles[min(count($tiles) - 1, 2)];
+        return [
+            ['type' => 'collect_tile', 'target' => 14 + (int) ($levelNum / 10), 'tileType' => $tile1],
+            ['type' => 'collect_tile', 'target' => 14 + (int) ($levelNum / 10), 'tileType' => $tile2],
+        ];
+    }
+
+    /**
+     * Generate obstacles tailored to level progression.
+     *
+     * // YB - 16-09-2026 Generate obstacles layout based on level number
+     */
+    protected function generateObstacles(int $levelNum): ?array
+    {
+        if ($levelNum <= 3) {
+            return null; // Intro levels have no obstacles
+        }
+
+        $obstacles = [];
+
+        // Levels with Cosmic Ice
+        if ($levelNum % 3 === 0 || ($levelNum % 4 === 3)) {
+            $iceCount = min(16, 6 + (int) ($levelNum / 8));
+            $coords = [
+                ['row' => 2, 'col' => 2], ['row' => 2, 'col' => 5],
+                ['row' => 3, 'col' => 3], ['row' => 3, 'col' => 4],
+                ['row' => 4, 'col' => 3], ['row' => 4, 'col' => 4],
+                ['row' => 5, 'col' => 2], ['row' => 5, 'col' => 5],
+                ['row' => 1, 'col' => 3], ['row' => 1, 'col' => 4],
+                ['row' => 6, 'col' => 3], ['row' => 6, 'col' => 4],
+                ['row' => 3, 'col' => 1], ['row' => 4, 'col' => 1],
+                ['row' => 3, 'col' => 6], ['row' => 4, 'col' => 6],
+            ];
+            for ($k = 0; $k < min($iceCount, count($coords)); $k++) {
+                $obstacles[] = ['row' => $coords[$k]['row'], 'col' => $coords[$k]['col'], 'type' => 'ice'];
+            }
+        }
+
+        // Levels with Gravity Locks
+        if ($levelNum > 20 && $levelNum % 5 === 0) {
+            $obstacles[] = ['row' => 0, 'col' => 0, 'type' => 'lock'];
+            $obstacles[] = ['row' => 0, 'col' => 7, 'type' => 'lock'];
+            $obstacles[] = ['row' => 7, 'col' => 0, 'type' => 'lock'];
+            $obstacles[] = ['row' => 7, 'col' => 7, 'type' => 'lock'];
+        }
+
+        // Levels with Asteroid Rocks
+        if ($levelNum > 35 && $levelNum % 6 === 0) {
+            $obstacles[] = ['row' => 2, 'col' => 3, 'type' => 'rock'];
+            $obstacles[] = ['row' => 5, 'col' => 4, 'type' => 'rock'];
+        }
+
+        return count($obstacles) > 0 ? $obstacles : null;
     }
 }

@@ -1,456 +1,107 @@
-// YB - 16-09-2026 Default Worlds & Level Configuration Schema for Planet Burst
-export const DEFAULT_WORLDS_DATA = [
-    {
-        id: 1,
-        order: 1,
-        name: 'Earth Orbit',
-        icon: '🌍',
-        description: 'Atmospheric boundary with tranquil cosmic radiation.',
-        is_unlocked: true,
-        levels: [
-            {
-                id: 1,
-                world_id: 1,
-                level_number: 1,
-                title: 'Sector Alpha',
-                difficulty: 'easy',
-                rows: 8,
-                columns: 8,
-                move_limit: 25,
-                star_thresholds: [3000, 6000, 9000],
-                objectives: [
-                    { type: 'score', target: 3000 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby'],
-                obstacles: [],
-                is_unlocked: true,
-                stars: 0,
-            },
-            {
-                id: 2,
-                world_id: 1,
-                level_number: 2,
-                title: 'Terra Horizon',
-                difficulty: 'easy',
-                rows: 8,
-                columns: 8,
-                move_limit: 22,
-                star_thresholds: [4000, 7500, 11000],
-                objectives: [
-                    { type: 'collect_tile', target: 18, tileType: 'planet_cyan' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 3,
-                world_id: 1,
-                level_number: 3,
-                title: 'Satellite Highway',
-                difficulty: 'medium',
-                rows: 8,
-                columns: 8,
-                move_limit: 20,
-                star_thresholds: [5000, 9000, 13000],
-                objectives: [
-                    { type: 'score', target: 5000 },
-                    { type: 'collect_tile', target: 15, tileType: 'planet_amber' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-        ],
-    },
-    {
-        id: 2,
-        order: 2,
-        name: 'Lunar Base',
-        icon: '🌙',
-        description: 'Craters veiled in frozen interstellar frost.',
-        is_unlocked: false,
-        levels: [
-            {
-                id: 4,
-                world_id: 2,
-                level_number: 4,
-                title: 'Tranquility Frost',
-                difficulty: 'medium',
-                rows: 8,
-                columns: 8,
-                move_limit: 24,
-                star_thresholds: [4500, 8000, 12000],
-                objectives: [
-                    { type: 'clear_ice', target: 8 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice'],
-                obstacles: [
-                    { row: 3, col: 3, type: 'ice' },
-                    { row: 3, col: 4, type: 'ice' },
-                    { row: 4, col: 3, type: 'ice' },
-                    { row: 4, col: 4, type: 'ice' },
-                    { row: 2, col: 2, type: 'ice' },
-                    { row: 2, col: 5, type: 'ice' },
-                    { row: 5, col: 2, type: 'ice' },
-                    { row: 5, col: 5, type: 'ice' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 5,
-                world_id: 2,
-                level_number: 5,
-                title: 'Crater Basin',
-                difficulty: 'medium',
-                rows: 8,
-                columns: 8,
-                move_limit: 22,
-                star_thresholds: [5500, 9500, 14000],
-                objectives: [
-                    { type: 'collect_tile', target: 20, tileType: 'planet_ice' },
-                    { type: 'clear_ice', target: 6 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ice', 'planet_solar'],
-                obstacles: [
-                    { row: 3, col: 2, type: 'ice' },
-                    { row: 3, col: 5, type: 'ice' },
-                    { row: 4, col: 2, type: 'ice' },
-                    { row: 4, col: 5, type: 'ice' },
-                    { row: 1, col: 3, type: 'ice' },
-                    { row: 6, col: 4, type: 'ice' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 6,
-                world_id: 2,
-                level_number: 6,
-                title: 'Eclipse Terminal',
-                difficulty: 'hard',
-                rows: 8,
-                columns: 8,
-                move_limit: 20,
-                star_thresholds: [7000, 12000, 17000],
-                objectives: [
-                    { type: 'score', target: 7000 },
-                    { type: 'collect_tile', target: 22, tileType: 'planet_purple' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-        ],
-    },
-    {
-        id: 3,
-        order: 3,
-        name: 'Mars Ridge',
-        icon: '🔴',
-        description: 'Red basalt cliffs with intense magnetic flux locks.',
-        is_unlocked: false,
-        levels: [
-            {
-                id: 7,
-                world_id: 3,
-                level_number: 7,
-                title: 'Olympus Ascent',
-                difficulty: 'medium',
-                rows: 8,
-                columns: 8,
-                move_limit: 23,
-                star_thresholds: [6000, 10000, 15000],
-                objectives: [
-                    { type: 'collect_tile', target: 24, tileType: 'planet_ruby' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_ruby', 'planet_solar'],
-                obstacles: [
-                    { row: 0, col: 0, type: 'lock' },
-                    { row: 0, col: 7, type: 'lock' },
-                    { row: 7, col: 0, type: 'lock' },
-                    { row: 7, col: 7, type: 'lock' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 8,
-                world_id: 3,
-                level_number: 8,
-                title: 'Dust Valley',
-                difficulty: 'hard',
-                rows: 8,
-                columns: 8,
-                move_limit: 20,
-                star_thresholds: [7500, 13000, 18000],
-                objectives: [
-                    { type: 'score', target: 7500 },
-                    { type: 'collect_tile', target: 16, tileType: 'planet_solar' },
-                ],
-                available_tiles: ['planet_amber', 'planet_purple', 'planet_ruby', 'planet_solar', 'planet_ice'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 9,
-                world_id: 3,
-                level_number: 9,
-                title: 'Valles Marineris',
-                difficulty: 'hard',
-                rows: 8,
-                columns: 8,
-                move_limit: 22,
-                star_thresholds: [8000, 14000, 20000],
-                objectives: [
-                    { type: 'clear_ice', target: 10 },
-                    { type: 'collect_tile', target: 20, tileType: 'planet_ruby' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                obstacles: [
-                    { row: 2, col: 2, type: 'ice' },
-                    { row: 2, col: 3, type: 'ice' },
-                    { row: 2, col: 4, type: 'ice' },
-                    { row: 2, col: 5, type: 'ice' },
-                    { row: 5, col: 2, type: 'ice' },
-                    { row: 5, col: 3, type: 'ice' },
-                    { row: 5, col: 4, type: 'ice' },
-                    { row: 5, col: 5, type: 'ice' },
-                    { row: 3, col: 3, type: 'ice' },
-                    { row: 4, col: 4, type: 'ice' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-        ],
-    },
-    {
-        id: 4,
-        order: 4,
-        name: 'Jupiter Storm',
-        icon: '🟠',
-        description: 'Vast swirling storms and dense asteroid belts.',
-        is_unlocked: false,
-        levels: [
-            {
-                id: 10,
-                world_id: 4,
-                level_number: 10,
-                title: 'Great Red Eye',
-                difficulty: 'hard',
-                rows: 8,
-                columns: 8,
-                move_limit: 22,
-                star_thresholds: [9000, 15000, 22000],
-                objectives: [
-                    { type: 'score', target: 9000 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_solar'],
-                obstacles: [
-                    { row: 3, col: 3, type: 'rock' },
-                    { row: 4, col: 4, type: 'rock' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 11,
-                world_id: 4,
-                level_number: 11,
-                title: 'Atmospheric Vortex',
-                difficulty: 'hard',
-                rows: 8,
-                columns: 8,
-                move_limit: 20,
-                star_thresholds: [9500, 16000, 24000],
-                objectives: [
-                    { type: 'collect_tile', target: 25, tileType: 'planet_amber' },
-                    { type: 'collect_tile', target: 25, tileType: 'planet_solar' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_solar'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 12,
-                world_id: 4,
-                level_number: 12,
-                title: 'Europa Crossing',
-                difficulty: 'expert',
-                rows: 8,
-                columns: 8,
-                move_limit: 18,
-                star_thresholds: [10000, 18000, 26000],
-                objectives: [
-                    { type: 'clear_ice', target: 12 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_ice', 'planet_solar'],
-                obstacles: [
-                    { row: 1, col: 1, type: 'ice' }, { row: 1, col: 6, type: 'ice' },
-                    { row: 2, col: 2, type: 'ice' }, { row: 2, col: 5, type: 'ice' },
-                    { row: 3, col: 3, type: 'ice' }, { row: 3, col: 4, type: 'ice' },
-                    { row: 4, col: 3, type: 'ice' }, { row: 4, col: 4, type: 'ice' },
-                    { row: 5, col: 2, type: 'ice' }, { row: 5, col: 5, type: 'ice' },
-                    { row: 6, col: 1, type: 'ice' }, { row: 6, col: 6, type: 'ice' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-        ],
-    },
-    {
-        id: 5,
-        order: 5,
-        name: 'Saturn Rings',
-        icon: '💍',
-        description: 'Glistening ring arcs composed of celestial crystals.',
-        is_unlocked: false,
-        levels: [
-            {
-                id: 13,
-                world_id: 5,
-                level_number: 13,
-                title: 'Cassini Division',
-                difficulty: 'hard',
-                rows: 8,
-                columns: 8,
-                move_limit: 22,
-                star_thresholds: [10000, 17000, 25000],
-                objectives: [
-                    { type: 'collect_tile', target: 30, tileType: 'planet_purple' },
-                ],
-                available_tiles: ['planet_amber', 'planet_purple', 'planet_ice', 'planet_solar'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 14,
-                world_id: 5,
-                level_number: 14,
-                title: 'Titan Outpost',
-                difficulty: 'expert',
-                rows: 8,
-                columns: 8,
-                move_limit: 20,
-                star_thresholds: [11000, 19000, 28000],
-                objectives: [
-                    { type: 'score', target: 11000 },
-                    { type: 'clear_ice', target: 8 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ice', 'planet_solar'],
-                obstacles: [
-                    { row: 2, col: 3, type: 'ice' }, { row: 2, col: 4, type: 'ice' },
-                    { row: 3, col: 2, type: 'ice' }, { row: 3, col: 5, type: 'ice' },
-                    { row: 4, col: 2, type: 'ice' }, { row: 4, col: 5, type: 'ice' },
-                    { row: 5, col: 3, type: 'ice' }, { row: 5, col: 4, type: 'ice' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 15,
-                world_id: 5,
-                level_number: 15,
-                title: 'Enceladus Cryo-Geyser',
-                difficulty: 'expert',
-                rows: 8,
-                columns: 8,
-                move_limit: 18,
-                star_thresholds: [12000, 20000, 30000],
-                objectives: [
-                    { type: 'collect_tile', target: 25, tileType: 'planet_ice' },
-                    { type: 'collect_tile', target: 25, tileType: 'planet_cyan' },
-                ],
-                available_tiles: ['planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-        ],
-    },
-    {
-        id: 6,
-        order: 6,
-        name: 'Deep Cosmos',
-        icon: '🌌',
-        description: 'The edge of chartered space approaching a supermassive anomaly.',
-        is_unlocked: false,
-        levels: [
-            {
-                id: 16,
-                world_id: 6,
-                level_number: 16,
-                title: 'Nebula Nexus',
-                difficulty: 'expert',
-                rows: 8,
-                columns: 8,
-                move_limit: 22,
-                star_thresholds: [13000, 22000, 32000],
-                objectives: [
-                    { type: 'score', target: 13000 },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                obstacles: [],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 17,
-                world_id: 6,
-                level_number: 17,
-                title: 'Event Horizon',
-                difficulty: 'expert',
-                rows: 8,
-                columns: 8,
-                move_limit: 20,
-                star_thresholds: [14000, 24000, 35000],
-                objectives: [
-                    { type: 'clear_ice', target: 12 },
-                    { type: 'collect_tile', target: 20, tileType: 'planet_ruby' },
-                ],
-                available_tiles: ['planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                obstacles: [
-                    { row: 0, col: 0, type: 'ice' }, { row: 0, col: 7, type: 'ice' },
-                    { row: 7, col: 0, type: 'ice' }, { row: 7, col: 7, type: 'ice' },
-                    { row: 3, col: 3, type: 'ice' }, { row: 3, col: 4, type: 'ice' },
-                    { row: 4, col: 3, type: 'ice' }, { row: 4, col: 4, type: 'ice' },
-                    { row: 2, col: 3, type: 'ice' }, { row: 2, col: 4, type: 'ice' },
-                    { row: 5, col: 3, type: 'ice' }, { row: 5, col: 4, type: 'ice' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-            {
-                id: 18,
-                world_id: 6,
-                level_number: 18,
-                title: 'Singularity Burst',
-                difficulty: 'master',
-                rows: 8,
-                columns: 8,
-                move_limit: 18,
-                star_thresholds: [16000, 28000, 40000],
-                objectives: [
-                    { type: 'score', target: 16000 },
-                    { type: 'collect_tile', target: 30, tileType: 'planet_solar' },
-                ],
-                available_tiles: ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
-                obstacles: [
-                    { row: 2, col: 2, type: 'rock' },
-                    { row: 2, col: 5, type: 'rock' },
-                    { row: 5, col: 2, type: 'rock' },
-                    { row: 5, col: 5, type: 'rock' },
-                ],
-                is_unlocked: false,
-                stars: 0,
-            },
-        ],
-    },
+// YB - 16-09-2026 100 levels across 10 worlds default configuration for Planet Burst
+
+const WORLD_CONFIGS = [
+    { id: 1, order: 1, name: 'Earth Orbit', icon: '🌍', description: 'Atmospheric boundary with calm cosmic rays. Flight training sector.' },
+    { id: 2, order: 2, name: 'Lunar Base', icon: '🌙', description: 'Craters and shadowed valleys encased in persistent frost.' },
+    { id: 3, order: 3, name: 'Mars Ridge', icon: '🔴', description: 'Red iron valleys with erratic gravitational flux locks.' },
+    { id: 4, order: 4, name: 'Jupiter Storm', icon: '🟠', description: 'Great atmospheric vortices and jagged stray meteoroid belts.' },
+    { id: 5, order: 5, name: 'Saturn Rings', icon: '💍', description: 'Glistening crystalline rings composed of frozen celestial shards.' },
+    { id: 6, order: 6, name: 'Neptune Abyss', icon: '🔵', description: 'Supersonic planetary winds and deep azure methane oceans.' },
+    { id: 7, order: 7, name: 'Solar Core', icon: '☀️', description: 'High-energy coronal loops and intense magnetic flares.' },
+    { id: 8, order: 8, name: 'Nebula Nexus', icon: '🟣', description: 'Prismatic stellar nursery where newborn cosmic powers form.' },
+    { id: 9, order: 9, name: 'Asteroid Belt', icon: '☄️', description: 'Treacherous orbital field of solid asteroids and energy barriers.' },
+    { id: 10, order: 10, name: 'Event Horizon', icon: '🕳️', description: 'The ultimate sector at the brink of an ancient supermassive singularity.' },
 ];
+
+const TILE_POOLS = [
+    ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby'],
+    ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice'],
+    ['planet_amber', 'planet_cyan', 'planet_purple', 'planet_ruby', 'planet_ice', 'planet_solar'],
+];
+
+// YB - 16-09-2026 Generate 100 default level configurations
+export const DEFAULT_WORLDS_DATA = WORLD_CONFIGS.map(w => {
+    const levels = [];
+    const baseNum = (w.order - 1) * 10;
+
+    for (let i = 1; i <= 10; i++) {
+        const lvlNum = baseNum + i;
+        const difficulty = lvlNum <= 15 ? 'easy' : (lvlNum <= 40 ? 'medium' : (lvlNum <= 70 ? 'hard' : (lvlNum <= 90 ? 'expert' : 'master')));
+        const tiles = lvlNum <= 10 ? TILE_POOLS[0] : (lvlNum <= 40 ? TILE_POOLS[1] : TILE_POOLS[2]);
+        const moveLimit = Math.max(15, 28 - Math.floor(lvlNum / 10));
+        const targetScore = 2500 + (lvlNum * 350);
+
+        const starThresholds = [
+            targetScore,
+            Math.floor(targetScore * 1.6),
+            Math.floor(targetScore * 2.3),
+        ];
+
+        let objectives = [];
+        const typeMod = lvlNum % 4;
+
+        if (typeMod === 1) {
+            objectives = [{ type: 'score', target: targetScore }];
+        } else if (typeMod === 2) {
+            const chosen = tiles[lvlNum % tiles.length];
+            objectives = [{ type: 'collect_tile', target: 15 + Math.floor(lvlNum / 5), tileType: chosen }];
+        } else if (typeMod === 3) {
+            objectives = [
+                { type: 'clear_ice', target: Math.min(16, 6 + Math.floor(lvlNum / 8)) },
+                { type: 'score', target: Math.floor(targetScore * 0.8) },
+            ];
+        } else {
+            objectives = [
+                { type: 'collect_tile', target: 14 + Math.floor(lvlNum / 10), tileType: tiles[0] },
+                { type: 'collect_tile', target: 14 + Math.floor(lvlNum / 10), tileType: tiles[Math.min(tiles.length - 1, 2)] },
+            ];
+        }
+
+        const obstacles = [];
+        if (lvlNum > 3 && (lvlNum % 3 === 0 || lvlNum % 4 === 3)) {
+            const coords = [
+                { row: 2, col: 2 }, { row: 2, col: 5 },
+                { row: 3, col: 3 }, { row: 3, col: 4 },
+                { row: 4, col: 3 }, { row: 4, col: 4 },
+                { row: 5, col: 2 }, { row: 5, col: 5 },
+            ];
+            for (const c of coords) {
+                obstacles.push({ row: c.row, col: c.col, type: 'ice' });
+            }
+        }
+        if (lvlNum > 20 && lvlNum % 5 === 0) {
+            obstacles.push({ row: 0, col: 0, type: 'lock' }, { row: 0, col: 7, type: 'lock' }, { row: 7, col: 0, type: 'lock' }, { row: 7, col: 7, type: 'lock' });
+        }
+        if (lvlNum > 35 && lvlNum % 6 === 0) {
+            obstacles.push({ row: 2, col: 3, type: 'rock' }, { row: 5, col: 4, type: 'rock' });
+        }
+
+        levels.push({
+            id: lvlNum,
+            world_id: w.id,
+            level_number: lvlNum,
+            title: `${w.name} - Sector ${i}`,
+            difficulty,
+            rows: 8,
+            columns: 8,
+            move_limit: moveLimit,
+            target_score: targetScore,
+            star_thresholds: starThresholds,
+            objectives,
+            available_tiles: tiles,
+            obstacles,
+            is_unlocked: lvlNum === 1,
+            stars: 0,
+        });
+    }
+
+    return {
+        id: w.id,
+        order: w.order,
+        name: w.name,
+        icon: w.icon,
+        description: w.description,
+        is_unlocked: w.order === 1,
+        levels,
+    };
+});

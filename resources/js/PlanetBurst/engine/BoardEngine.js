@@ -304,6 +304,55 @@ export class BoardEngine {
             }
         }
 
+        // YB - 16-09-2026 Trigger secondary blasts if any matched tile was already a power tile
+        let addedMore = true;
+        const triggeredPowers = new Set();
+
+        while (addedMore) {
+            addedMore = false;
+            for (const k of Array.from(clearedPositions)) {
+                if (triggeredPowers.has(k)) continue;
+                const [r, c] = k.split(',').map(Number);
+                const tile = this.getTile(r, c);
+
+                if (tile?.power) {
+                    triggeredPowers.add(k);
+
+                    if (tile.power === POWER_TYPES.COMET_H) {
+                        for (let colIdx = 0; colIdx < this.cols; colIdx++) {
+                            const ck = `${r},${colIdx}`;
+                            if (!clearedPositions.has(ck)) {
+                                clearedPositions.add(ck);
+                                addedMore = true;
+                            }
+                        }
+                    } else if (tile.power === POWER_TYPES.COMET_V) {
+                        for (let rowIdx = 0; rowIdx < this.rows; rowIdx++) {
+                            const ck = `${rowIdx},${c}`;
+                            if (!clearedPositions.has(ck)) {
+                                clearedPositions.add(ck);
+                                addedMore = true;
+                            }
+                        }
+                    } else if (tile.power === POWER_TYPES.BLACK_HOLE) {
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                const nr = r + dr;
+                                const nc = c + dc;
+                                if (nr >= 0 && nr < this.rows && nc >= 0 && nc < this.cols) {
+                                    const ck = `${nr},${nc}`;
+                                    if (!clearedPositions.has(ck)) {
+                                        clearedPositions.add(ck);
+                                        addedMore = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return {
             clearedCoords: Array.from(clearedPositions).map(k => {
                 const [r, c] = k.split(',').map(Number);

@@ -64,7 +64,9 @@ class PlanetBurstApiControllerTest extends TestCase
                 ],
             ]);
 
-        $this->assertCount(6, $response->json('worlds'));
+        $this->assertCount(10, $response->json('worlds'));
+        $totalLevels = collect($response->json('worlds'))->sum(fn($w) => count($w['levels']));
+        $this->assertEquals(100, $totalLevels);
     }
 
     /**

@@ -168,6 +168,7 @@
                     :rows="mission.activeLevel.value?.rows || 8"
                     :cols="mission.activeLevel.value?.columns || 8"
                     :selected-tile="board.selectedTile.value"
+                    :swapping-state="board.swappingState.value"
                     :is-reshuffling="board.isReshuffling.value"
                     :power-effects="board.activePowerEffects.value"
                     :popups="score.recentScorePopups.value"
