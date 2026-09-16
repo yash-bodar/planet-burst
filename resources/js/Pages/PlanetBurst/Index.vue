@@ -144,21 +144,68 @@
         <!-- ============================================== -->
         <main
             v-else-if="currentView === 'game'"
-            class="relative z-10 flex-1 flex flex-col items-center justify-between px-2 sm:px-4 py-2 max-w-lg mx-auto w-full gap-2 sm:gap-3"
+            class="relative z-10 flex-1 flex flex-col items-center justify-between px-2 sm:px-4 py-2 max-w-xl mx-auto w-full gap-2 sm:gap-3"
         >
-            <!-- Mission HUD: Objectives & Score & Moves -->
-            <div class="w-full flex items-center justify-between gap-2 px-1">
-                <MoveCounter :moves-remaining="mission.movesRemaining.value" />
-                <ScoreDisplay
-                    :score="score.currentScore.value"
-                    :stars-earned="score.starProgress.value"
-                    :star-thresholds="mission.activeLevel.value?.star_thresholds"
-                />
+            <!-- Game Top Cockpit Navigation Bar -->
+            <div class="w-full flex items-center justify-between px-1 py-1">
+                <button
+                    type="button"
+                    @click="exitToGalaxyMap"
+                    class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/80 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
+                >
+                    <span>←</span>
+                    <span class="uppercase tracking-wider">Map</span>
+                </button>
+
+                <!-- Mission Indicator Badge -->
+                <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 shadow-md">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    <span class="font-mono text-xs font-black text-cyan-300 uppercase tracking-wider">
+                        {{ mission.activeLevel.value?.title || 'Mission' }}
+                    </span>
+                </div>
+
+                <!-- Quick Action Buttons: Sound & Restart -->
+                <div class="flex items-center gap-1.5">
+                    <button
+                        type="button"
+                        @click="audio.toggleMute"
+                        class="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer flex items-center justify-center shadow-md"
+                        :title="audio.isMuted.value ? 'Unmute' : 'Mute'"
+                    >
+                        <span>{{ audio.isMuted.value ? '🔇' : '🔊' }}</span>
+                    </button>
+                    <button
+                        type="button"
+                        @click="restartCurrentLevel"
+                        class="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer flex items-center justify-center shadow-md"
+                        title="Restart Level"
+                    >
+                        <span>↺</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- Objective Targets Banner -->
-            <div class="w-full flex items-center justify-center py-1">
-                <MissionObjective :objectives="mission.objectives.value" />
+            <!-- Unified Mission HUD Console -->
+            <div class="w-full bg-slate-950/70 border border-slate-800/80 rounded-3xl p-2.5 backdrop-blur-xl shadow-[0_4px_25px_rgba(0,0,0,0.5)] flex items-center justify-between gap-2">
+                <!-- 1. Left: Move Counter Reactor -->
+                <div class="flex-shrink-0">
+                    <MoveCounter :moves-remaining="mission.movesRemaining.value" />
+                </div>
+
+                <!-- 2. Center: Mission Objectives Pod -->
+                <div class="flex-1 flex items-center justify-center px-1">
+                    <MissionObjective :objectives="mission.objectives.value" />
+                </div>
+
+                <!-- 3. Right: Score & 3-Star Meter -->
+                <div class="flex-shrink-0">
+                    <ScoreDisplay
+                        :score="score.currentScore.value"
+                        :stars-earned="score.starProgress.value"
+                        :star-thresholds="mission.activeLevel.value?.star_thresholds"
+                    />
+                </div>
             </div>
 
             <!-- Main Cosmic Board Grid Area -->
@@ -170,24 +217,27 @@
                     :selected-tile="board.selectedTile.value"
                     :swapping-state="board.swappingState.value"
                     :is-reshuffling="board.isReshuffling.value"
+                    :is-celebrating="board.isCelebrating.value"
                     :power-effects="board.activePowerEffects.value"
                     :popups="score.recentScorePopups.value"
+                    :screen-shake="board.screenShake.value"
                     @tile-click="board.selectTile"
                     @swipe="board.handleSwipe"
                 />
             </div>
 
-            <!-- Quick Board Bottom Bar -->
-            <div class="w-full flex items-center justify-between px-2 py-1 text-xs text-slate-500 font-medium">
-                <span class="font-mono font-bold text-slate-400">
-                    {{ mission.activeLevel.value?.title || 'Mission' }}
+            <!-- Subtle Bottom Status -->
+            <div class="w-full flex items-center justify-between px-3 py-0.5 text-[11px] text-slate-500 font-medium">
+                <span class="flex items-center gap-1">
+                    <span class="text-cyan-400">✦</span>
+                    <span>Match 4 for Striped Comets • 5 for Supernovas • L/T for Bombs</span>
                 </span>
                 <button
                     type="button"
-                    @click="restartCurrentLevel"
-                    class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer font-bold text-[11px]"
+                    @click="showSettingsModal = true"
+                    class="hover:text-slate-300 transition-colors cursor-pointer"
                 >
-                    Restart ↺
+                    Help & Settings ⚙
                 </button>
             </div>
         </main>

@@ -253,15 +253,17 @@ const tileThemeClasses = computed(() => {
 }
 
 .is-selected .cosmic-tile-body {
-    transform: scale(1.08);
+    transform: scale(1.12);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.6);
 }
 
 .is-matched .cosmic-tile-body {
-    animation: matchPop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: matchPop 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    z-index: 30;
 }
 
 .is-new .cosmic-tile-body {
-    animation: dropIn 0.24s ease-out forwards;
+    animation: dropIn 0.34s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
 
 @keyframes matchPop {
@@ -269,9 +271,9 @@ const tileThemeClasses = computed(() => {
         transform: scale(1);
         filter: brightness(1);
     }
-    40% {
-        transform: scale(1.22);
-        filter: brightness(2) drop-shadow(0 0 12px #ffffff);
+    35% {
+        transform: scale(1.28);
+        filter: brightness(2.2) drop-shadow(0 0 16px #ffffff);
     }
     100% {
         transform: scale(0);
@@ -281,8 +283,12 @@ const tileThemeClasses = computed(() => {
 
 @keyframes dropIn {
     0% {
-        transform: translateY(-20px) scale(0.6);
-        opacity: 0.2;
+        transform: translateY(-30px) scale(0.65);
+        opacity: 0.1;
+    }
+    75% {
+        transform: translateY(4px) scale(1.05);
+        opacity: 0.95;
     }
     100% {
         transform: translateY(0) scale(1);
