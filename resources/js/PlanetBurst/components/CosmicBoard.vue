@@ -28,10 +28,7 @@
                     v-for="(tile, c) in row"
                     :key="tile ? tile.id : 'empty-'+r+'-'+c"
                     class="relative w-full h-full flex items-center justify-center"
-                    :style="{
-                        gridRow: r + 1,
-                        gridColumn: c + 1
-                    }"
+                    :style="getTileWrapperStyle(r, c)"
                     @click="onTileClick(r, c)"
                 >
                     <CosmicTile
@@ -132,6 +129,10 @@ const props = defineProps({
         type: Object,
         default: null,
     },
+    swappingState: {
+        type: Object,
+        default: null,
+    },
     isReshuffling: {
         type: Boolean,
         default: false,
@@ -153,6 +154,35 @@ let pointerStartX = 0;
 let pointerStartY = 0;
 let startCell = null;
 let isDragging = false;
+
+// YB - 16-09-2026 Compute smooth physical sliding transition style during swaps
+function getTileWrapperStyle(r, c) {
+    const base = {
+        gridRow: r + 1,
+        gridColumn: c + 1,
+    };
+
+    const swap = props.swappingState;
+    if (swap) {
+        if (swap.r1 === r && swap.c1 === c) {
+            return {
+                ...base,
+                transform: `translate(${swap.dx * 100}%, ${swap.dy * 100}%)`,
+                transition: 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)',
+                zIndex: 35,
+            };
+        } else if (swap.r2 === r && swap.c2 === c) {
+            return {
+                ...base,
+                transform: `translate(${-swap.dx * 100}%, ${-swap.dy * 100}%)`,
+                transition: 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)',
+                zIndex: 35,
+            };
+        }
+    }
+
+    return base;
+}
 
 // YB - 16-09-2026 Check whether a grid cell is currently selected
 function isSelected(r, c) {

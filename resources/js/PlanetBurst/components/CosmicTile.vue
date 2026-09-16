@@ -143,48 +143,57 @@
                 </g>
             </svg>
 
-            <!-- 🌟 Special Power Badges & Overlays -->
-            <!-- 1. Horizontal Comet -->
+            <!-- 🌟 Special Power Badges & Overlays (Candy Crush style powers) -->
+            <!-- 1. Horizontal Striped Candy/Comet (Clears Row) -->
             <div
                 v-if="tile.power === 'comet_h'"
-                class="absolute inset-0 flex items-center justify-between px-1 pointer-events-none"
+                class="absolute inset-0 flex flex-col items-center justify-around py-2 px-1 pointer-events-none z-20"
             >
-                <div class="w-full h-1.5 bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_10px_#22d3ee] rounded-full animate-pulse"></div>
-                <div class="absolute inset-0 flex items-center justify-between px-0.5">
-                    <span class="text-[10px] font-black text-cyan-200">◀</span>
-                    <span class="text-[10px] font-black text-cyan-200">▶</span>
+                <div class="w-full h-1 bg-white shadow-[0_0_8px_#ffffff] rounded-full opacity-90"></div>
+                <div class="w-full h-1.5 bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_12px_#38bdf8] rounded-full"></div>
+                <div class="w-full h-1 bg-white shadow-[0_0_8px_#ffffff] rounded-full opacity-90"></div>
+                <!-- Mini directional markers -->
+                <div class="absolute inset-0 flex items-center justify-between px-1">
+                    <span class="text-[9px] font-black text-white drop-shadow-[0_0_4px_#000000]">◀</span>
+                    <span class="text-[9px] font-black text-white drop-shadow-[0_0_4px_#000000]">▶</span>
                 </div>
             </div>
 
-            <!-- 2. Vertical Comet -->
+            <!-- 2. Vertical Striped Candy/Comet (Clears Column) -->
             <div
                 v-else-if="tile.power === 'comet_v'"
-                class="absolute inset-0 flex flex-col items-center justify-between py-1 pointer-events-none"
+                class="absolute inset-0 flex items-center justify-around px-2 py-1 pointer-events-none z-20"
             >
-                <div class="h-full w-1.5 bg-gradient-to-b from-transparent via-cyan-300 to-transparent shadow-[0_0_10px_#22d3ee] rounded-full animate-pulse"></div>
-                <div class="absolute inset-0 flex flex-col items-center justify-between py-0.5">
-                    <span class="text-[10px] font-black text-cyan-200">▲</span>
-                    <span class="text-[10px] font-black text-cyan-200">▼</span>
+                <div class="h-full w-1 bg-white shadow-[0_0_8px_#ffffff] rounded-full opacity-90"></div>
+                <div class="h-full w-1.5 bg-gradient-to-b from-transparent via-white to-transparent shadow-[0_0_12px_#38bdf8] rounded-full"></div>
+                <div class="h-full w-1 bg-white shadow-[0_0_8px_#ffffff] rounded-full opacity-90"></div>
+                <!-- Mini directional markers -->
+                <div class="absolute inset-0 flex flex-col items-center justify-between py-1">
+                    <span class="text-[9px] font-black text-white drop-shadow-[0_0_4px_#000000]">▲</span>
+                    <span class="text-[9px] font-black text-white drop-shadow-[0_0_4px_#000000]">▼</span>
                 </div>
             </div>
 
-            <!-- 3. Black Hole Vortex -->
+            <!-- 3. Big Cosmic Bomb (Black Hole from T, L, or + shape) - Explodes 3x3 -->
             <div
                 v-else-if="tile.power === 'black_hole'"
-                class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                class="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
             >
-                <div class="w-7 h-7 rounded-full bg-black/90 border-2 border-purple-400 shadow-[0_0_14px_#c084fc] flex items-center justify-center animate-spin">
-                    <div class="w-3 h-3 rounded-full bg-purple-300 shadow-[0_0_8px_#ffffff]"></div>
+                <div class="relative w-8 h-8 rounded-full bg-slate-950/90 border-2 border-purple-400 shadow-[0_0_18px_#a855f7] flex items-center justify-center animate-pulse">
+                    <span class="text-sm">💣</span>
+                    <div class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b] animate-ping"></div>
                 </div>
             </div>
 
-            <!-- 4. Supernova Core -->
+            <!-- 4. Color Bomb (Supernova from 5 in a straight line) - Clears all of chosen type -->
             <div
                 v-else-if="tile.power === 'supernova'"
-                class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                class="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
             >
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-300 via-rose-500 to-cyan-400 border-2 border-white shadow-[0_0_18px_#ffffff] flex items-center justify-center animate-pulse">
-                    <span class="text-xs">⚡</span>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-300 via-rose-500 via-purple-500 to-cyan-400 border-2 border-white shadow-[0_0_22px_#ffffff] flex items-center justify-center animate-spin" style="animation-duration: 6s;">
+                    <div class="w-4 h-4 rounded-full bg-white/90 shadow-[0_0_10px_#ffffff] flex items-center justify-center text-[10px]">
+                        ★
+                    </div>
                 </div>
             </div>
         </div>
