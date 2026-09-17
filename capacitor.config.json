@@ -3,7 +3,7 @@
   "appName": "Planet Burst",
   "webDir": "public/build",
   "server": {
-    "url": "http://192.168.1.180/planet-burst/public",
+    "url": "http://localhost/planet-burst/public",
     "cleartext": true
   },
   "android": {
