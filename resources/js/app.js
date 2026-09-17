@@ -6,7 +6,7 @@ const initialPage = el?.dataset?.page ? JSON.parse(el.dataset.page) : undefined;
 
 createInertiaApp({
     page: initialPage,
-    title: (title) => title ? `${title} - Guess-X` : 'Guess-X: Ultimate Word Game',
+    title: (title) => title ? title : 'Planet Burst — Cosmic Match-3 Puzzle Game',
     resolve: (name) => {
         const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
         const page = pages[`./Pages/${name}.vue`];

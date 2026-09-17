@@ -1,4 +1,5 @@
 <template>
+    <Head title="Planet Burst — Cosmic Match-3 Adventure" />
     <div class="relative min-h-screen bg-slate-950 text-slate-100 font-sans select-none overflow-x-hidden flex flex-col justify-between">
         <!-- Ambient Cosmic Background with Starfield and Nebula Glow -->
         <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -298,6 +299,7 @@
 <script setup>
 // YB - 16-09-2026 Planet Burst Main Game View coordinating composables, modals, and screen navigation
 import { ref, computed, onMounted, watch } from 'vue';
+import { Head } from '@inertiajs/vue3';
 import confetti from 'canvas-confetti';
 
 import CosmicHeader from '../../PlanetBurst/components/CosmicHeader.vue';

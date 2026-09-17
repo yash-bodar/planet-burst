@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.company.guessx"
+    namespace = "com.company.planet-burst"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.company.guessx"
+        applicationId "com.company.planet-burst"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

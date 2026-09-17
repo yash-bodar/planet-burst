@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="description" content="Word Game with X-Factor clue. Guess the secret 5, 6, or 7-letter word with dynamic clues!">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Planet Burst - Deep Space Match-3 Adventure with 100 levels, cosmic powers, and tactical boosters.">
+    <meta name="theme-color" content="#030712">
     <meta name="color-scheme" content="dark light">
 
-    <title inertia>{{ config('app.name', 'Word Game') }}</title>
+    <title inertia>{{ config('app.name', 'Planet Burst') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
