@@ -118,16 +118,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Footer Link to Guess-X -->
-            <div class="text-center pt-4">
-                <a
-                    href="/guess-x"
-                    class="text-[11px] text-slate-500 hover:text-slate-300 transition-colors uppercase font-bold tracking-wider"
-                >
-                    Switch to Guess-X Word Game →
-                </a>
-            </div>
         </main>
 
         <!-- ============================================== -->

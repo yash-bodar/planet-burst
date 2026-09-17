@@ -37,14 +37,14 @@ class PlanetBurstApiControllerTest extends TestCase
     }
 
     /**
-     * Test Guess-X route remains accessible at /guess-x.
+     * Test legacy route redirects to Planet Burst home.
      *
-     * // YB - 16-09-2026 Verify Guess-X word game regression safety
+     * // YB - 17-09-2026 Verify legacy route redirects to Planet Burst
      */
-    public function test_guess_x_route_remains_intact(): void
+    public function test_legacy_route_redirects_to_planet_burst(): void
     {
         $response = $this->get('/guess-x');
-        $response->assertStatus(200);
+        $response->assertRedirect('/');
     }
 
     /**

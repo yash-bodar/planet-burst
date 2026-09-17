@@ -77,16 +77,6 @@
                     </div>
                 </div>
 
-                <!-- Switch to Guess-X Game Link -->
-                <div class="pt-2">
-                    <a
-                        href="/guess-x"
-                        class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all text-center"
-                    >
-                        <span>Switch to Guess-X Word Game</span>
-                        <span>→</span>
-                    </a>
-                </div>
             </div>
         </div>
     </div>

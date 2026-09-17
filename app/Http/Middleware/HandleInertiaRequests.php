@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'appName' => config('app.name', 'Guess-X'),
+            'appName' => config('app.name', 'Planet Burst'),
             'auth' => [
                 'auth_provider' => $request->session()->get('auth_provider', 'email'),
                 'user' => $request->user() ? [
