@@ -106,7 +106,7 @@ Follow these exact steps when cloning this repository to a new computer:
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/your-username/planet-burst.git
+git clone https://github.com/yash-bodar/planet-burst.git
 cd planet-burst
 ```
 
@@ -127,7 +127,7 @@ Open `.env` and verify your local database settings:
 ```ini
 APP_NAME="Planet Burst"
 APP_ENV=local
-APP_KEY=base64:...
+APP_KEY=
 APP_DEBUG=true
 APP_URL=http://localhost/planet-burst/public
 
