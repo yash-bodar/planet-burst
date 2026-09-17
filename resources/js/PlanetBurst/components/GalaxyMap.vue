@@ -22,7 +22,7 @@
             <div
                 v-for="world in worlds"
                 :key="world.id"
-                class="flex flex-col rounded-3xl border overflow-hidden transition-all duration-300 backdrop-blur-md"
+                class="flex flex-col rounded-3xl border overflow-hidden transition-all duration-300 backdrop-blur-md relative"
                 :class="world.is_unlocked ? 'bg-slate-900/70 border-slate-700/80 shadow-lg' : 'bg-slate-950/40 border-slate-800/40 opacity-60'"
             >
                 <!-- World Header Banner -->
@@ -47,23 +47,29 @@
                     </div>
                 </div>
 
-                <!-- Mission Nodes -->
-                <div class="p-5 grid grid-cols-3 gap-3">
+                <!-- Mission Nodes with Constellation Trail Connections -->
+                <div class="p-5 grid grid-cols-3 sm:grid-cols-5 gap-3 relative z-10">
                     <button
                         v-for="level in world.levels"
                         :key="level.id"
                         type="button"
-                        @click="level.is_unlocked && $emit('select-level', level)"
+                        @click="level.is_unlocked && openBriefing(level)"
                         :disabled="!level.is_unlocked"
-                        class="flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-200 cursor-pointer"
+                        class="relative flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-200 cursor-pointer group"
                         :class="[
                             level.is_unlocked
                                 ? 'bg-slate-950/80 border-slate-700/80 hover:border-cyan-400 hover:scale-105 active:scale-95 shadow-md'
                                 : 'bg-slate-950/30 border-slate-800/30 cursor-not-allowed opacity-50'
                         ]"
                     >
+                        <!-- Active Glowing Pulse for Current Highest Level -->
+                        <div
+                            v-if="level.is_unlocked && (!level.stars || level.stars === 0)"
+                            class="absolute -inset-0.5 rounded-2xl border-2 border-cyan-400/80 animate-pulse pointer-events-none shadow-[0_0_12px_#22d3ee]"
+                        ></div>
+
                         <!-- Mission Badge Number -->
-                        <span class="font-mono font-black text-lg text-white">
+                        <span class="font-mono font-black text-lg text-white group-hover:text-cyan-300 transition-colors">
                             {{ level.level_number }}
                         </span>
 
@@ -81,12 +87,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Pre-Mission Briefing Modal -->
+        <MissionBriefingModal
+            :is-open="!!selectedBriefingLevel"
+            :level="selectedBriefingLevel"
+            @close="selectedBriefingLevel = null"
+            @launch="launchFromBriefing"
+        />
     </div>
 </template>
 
 <script setup>
-// YB - 16-09-2026 GalaxyMap presentation component with worlds and level nodes
-import { computed } from 'vue';
+// YB - 17-09-2026 GalaxyMap presentation component with world constellation nodes and Pre-Mission Briefing modal
+import { ref, computed } from 'vue';
+import MissionBriefingModal from './MissionBriefingModal.vue';
 
 const props = defineProps({
     worlds: {
@@ -95,43 +110,50 @@ const props = defineProps({
     },
 });
 
-defineEmits(['select-level']);
+const emit = defineEmits(['select-level']);
+
+const selectedBriefingLevel = ref(null);
+
+function openBriefing(level) {
+    selectedBriefingLevel.value = level;
+}
+
+function launchFromBriefing(level) {
+    selectedBriefingLevel.value = null;
+    emit('select-level', level);
+}
 
 const totalStars = computed(() => {
     let count = 0;
     for (const w of props.worlds) {
-        for (const l of (w.levels || [])) {
-            count += l.stars || 0;
+        for (const lvl of (w.levels || [])) {
+            count += lvl.stars || 0;
         }
     }
     return count;
 });
 
 const maxPossibleStars = computed(() => {
-    let count = 0;
+    let totalLevels = 0;
     for (const w of props.worlds) {
-        count += (w.levels || []).length * 3;
+        totalLevels += (w.levels || []).length;
     }
-    return Math.max(1, count);
+    return totalLevels * 3;
 });
 
-// YB - 16-09-2026 Return world-specific cosmic background gradient
 function getWorldBannerGradient(worldId) {
-    switch (worldId) {
-        case 1:
-            return 'from-emerald-900/60 to-cyan-900/40 border-b border-emerald-500/30';
-        case 2:
-            return 'from-slate-800/80 to-sky-900/40 border-b border-sky-500/30';
-        case 3:
-            return 'from-rose-950/80 to-amber-950/40 border-b border-rose-500/30';
-        case 4:
-            return 'from-amber-950/80 to-orange-950/40 border-b border-amber-500/30';
-        case 5:
-            return 'from-purple-950/80 to-indigo-950/40 border-b border-purple-500/30';
-        case 6:
-            return 'from-indigo-950/80 to-violet-950/40 border-b border-violet-500/30';
-        default:
-            return 'from-slate-900 to-slate-950 border-b border-slate-700';
-    }
+    const gradients = [
+        'from-blue-900/80 via-cyan-900/60 to-slate-900/80 border-b border-cyan-500/30',
+        'from-slate-800/80 via-indigo-950/60 to-slate-900/80 border-b border-indigo-500/30',
+        'from-rose-950/80 via-red-900/60 to-slate-900/80 border-b border-rose-500/30',
+        'from-amber-950/80 via-orange-900/60 to-slate-900/80 border-b border-amber-500/30',
+        'from-yellow-950/80 via-amber-900/60 to-slate-900/80 border-b border-yellow-500/30',
+        'from-sky-950/80 via-blue-900/60 to-slate-900/80 border-b border-sky-500/30',
+        'from-orange-950/80 via-red-950/60 to-slate-900/80 border-b border-orange-500/30',
+        'from-purple-950/80 via-fuchsia-900/60 to-slate-900/80 border-b border-purple-500/30',
+        'from-stone-900/80 via-slate-900/60 to-slate-950/80 border-b border-stone-500/30',
+        'from-purple-950/90 via-slate-950 to-black border-b border-cyan-400/40',
+    ];
+    return gradients[(worldId - 1) % gradients.length] || gradients[0];
 }
 </script>

@@ -1,8 +1,9 @@
-// YB - 16-09-2026 Master Cosmic Board reactive composable coordinating engine, animations, powers, screen shake, and cascades
+// YB - 17-09-2026 Master Cosmic Board reactive composable coordinating engine, animations, powers, screen shake, and cascades
 import { ref } from 'vue';
 import { BoardEngine, POWER_TYPES, COSMIC_TILE_TYPES } from '../engine/BoardEngine.js';
+import { useHaptics } from './useHaptics.js';
 
-export function useCosmicBoard(audioComposable, scoreComposable, missionComposable) {
+export function useCosmicBoard(audioComposable, scoreComposable, missionComposable, boostersComposable = null) {
     const engine = ref(new BoardEngine());
     const grid = ref([]);
     const selectedTile = ref(null);
@@ -13,6 +14,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
     const activeCascades = ref(0);
     const activePowerEffects = ref([]); // Visual laser/vortex/explosion overlays
     const screenShake = ref(null); // 'light' | 'medium' | 'heavy'
+    const haptics = useHaptics();
 
     // YB - 16-09-2026 Deeply synchronize board engine state to Vue reactive ref
     function syncGrid() {
@@ -20,9 +22,10 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         grid.value = engine.value.grid.map(row => [...row]);
     }
 
-    // YB - 16-09-2026 Trigger haptic screen shake effect
+    // YB - 17-09-2026 Trigger haptic screen shake and physical mobile vibration
     function triggerScreenShake(type = 'light') {
         screenShake.value = type;
+        haptics.vibrateHeavy();
         setTimeout(() => {
             if (screenShake.value === type) {
                 screenShake.value = null;
@@ -64,6 +67,16 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
     async function selectTile(row, col) {
         if (isBusy.value || isCelebrating.value || missionComposable.missionStatus.value !== 'in_progress') return;
 
+        // Check if an active targeting booster is primed
+        if (boostersComposable?.activeBooster.value === 'hammer') {
+            await handleHammerBooster(row, col);
+            return;
+        }
+        if (boostersComposable?.activeBooster.value === 'ion_ray') {
+            await handleIonRayBooster(row, col);
+            return;
+        }
+
         const clickedTile = engine.value.getTile(row, col);
         if (!clickedTile || clickedTile.obstacle === 'rock' || clickedTile.obstacle === 'lock') return;
 
@@ -89,6 +102,85 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             // Clicked a non-adjacent tile -> re-select
             selectedTile.value = { row, col, tile: clickedTile };
             audioComposable.playSwap();
+        }
+    }
+
+    // YB - 17-09-2026 Handle Cosmic Hammer booster strike on target tile
+    async function handleHammerBooster(row, col) {
+        const targetTile = engine.value.getTile(row, col);
+        if (!targetTile) return;
+
+        isBusy.value = true;
+        boostersComposable.consumeBooster('hammer');
+        triggerScreenShake('medium');
+        audioComposable.playBlackHole();
+
+        spawnPowerEffect('black_hole', row, col);
+
+        const clearedCoords = [{ row, col, tile: targetTile }];
+        if (targetTile.obstacle === 'ice') {
+            targetTile.obstacle = null;
+            missionComposable.recordObstacleClear('ice');
+        }
+        missionComposable.recordTileClears(clearedCoords);
+        breakAdjacentIce(clearedCoords);
+
+        engine.value.clearTiles(clearedCoords);
+        syncGrid();
+        await sleep(150);
+
+        engine.value.applyGravityAndRefill();
+        syncGrid();
+        await sleep(340);
+
+        await runCascadeLoop();
+        await checkEndConditions();
+        isBusy.value = false;
+    }
+
+    // YB - 17-09-2026 Handle Ion Ray Gun booster firing along entire row
+    async function handleIonRayBooster(row, col) {
+        isBusy.value = true;
+        boostersComposable.consumeBooster('ion_ray');
+        triggerScreenShake('light');
+        audioComposable.playComet();
+
+        spawnPowerEffect('laser_h', row, col);
+
+        const clearedCoords = [];
+        for (let c = 0; c < engine.value.cols; c++) {
+            const tile = engine.value.getTile(row, c);
+            clearedCoords.push({ row, col: c, tile });
+        }
+
+        missionComposable.recordTileClears(clearedCoords);
+        breakAdjacentIce(clearedCoords);
+
+        engine.value.clearTiles(clearedCoords);
+        syncGrid();
+        await sleep(150);
+
+        engine.value.applyGravityAndRefill();
+        syncGrid();
+        await sleep(340);
+
+        await runCascadeLoop();
+        await checkEndConditions();
+        isBusy.value = false;
+    }
+
+    // YB - 17-09-2026 Handle instant booster activations like UFO Gravity Shuffle
+    async function triggerInstantBooster(type) {
+        if (isBusy.value || isCelebrating.value) return;
+
+        if (type === 'ufo') {
+            isBusy.value = true;
+            boostersComposable.consumeBooster('ufo');
+            triggerScreenShake('medium');
+            audioComposable.playSupernova();
+
+            await handleDeadlock();
+            isBusy.value = false;
         }
     }
 
@@ -128,6 +220,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         const dy = r2 - r1;
         swappingState.value = { r1, c1, r2, c2, dx, dy, isReverting: false };
         audioComposable.playSwap();
+        haptics.vibrateLight();
         await sleep(300);
 
         // Perform swap in engine
@@ -135,11 +228,20 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         swappingState.value = null;
         syncGrid();
 
-        // Power tile special activations
+        // Check if Free Swap booster is active
+        const isFreeSwap = boostersComposable?.activeBooster.value === 'free_swap';
+        if (isFreeSwap) {
+            boostersComposable.consumeBooster('free_swap');
+        }
+
+        // Special Power activations:
+        // Case A: Swapping TWO power tiles together (always valid combo!)
+        // Case B: Swapping a Supernova (Color Bomb) with ANY tile (always valid color blast!)
         const isPower1 = !!tile1.power;
         const isPower2 = !!tile2.power;
+        const isSupernovaSwap = tile1.power === POWER_TYPES.SUPERNOVA || tile2.power === POWER_TYPES.SUPERNOVA;
 
-        if (isPower1 || isPower2) {
+        if ((isPower1 && isPower2) || isSupernovaSwap) {
             missionComposable.useMove();
             await handlePowerInteractions(r1, c1, r2, c2, tile1, tile2);
             await runCascadeLoop();
@@ -148,7 +250,8 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             return;
         }
 
-        // Standard swap match check
+        // Case C: Standard swap OR single Striped / Bomb swapped with normal tile
+        // Candy Crush rule: Single Striped / Bomb with normal tile MUST form a 3+ match of that color to activate!
         const matchResult = engine.value.findMatches();
 
         if (matchResult.hasMatches) {
@@ -169,12 +272,12 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         isBusy.value = false;
     }
 
-    // YB - 16-09-2026 Handle power tiles swap and combinations with rich visual effects
+    // YB - 17-09-2026 Handle power tiles swap and combinations with authentic Candy Crush rules
     async function handlePowerInteractions(r1, c1, r2, c2, tile1, tile2) {
         const clearedSet = new Set();
         const key = (r, c) => `${r},${c}`;
 
-        // Combination: Supernova + Supernova -> Universal Burst (clears entire board)
+        // 1. Combination: Supernova + Supernova -> Universal Burst (clears entire board)
         if (tile1.power === POWER_TYPES.SUPERNOVA && tile2.power === POWER_TYPES.SUPERNOVA) {
             audioComposable.playSupernova();
             scoreComposable.addPowerActivationScore('combo', r2, c2);
@@ -187,7 +290,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
                 }
             }
         }
-        // Supernova + Comet: turns all tiles of that type into Comets and triggers them
+        // 2. Combination: Supernova + Comet -> Converts ALL planets of that color into Striped Comets and detonates all!
         else if (
             (tile1.power === POWER_TYPES.SUPERNOVA && (tile2.power === POWER_TYPES.COMET_H || tile2.power === POWER_TYPES.COMET_V)) ||
             (tile2.power === POWER_TYPES.SUPERNOVA && (tile1.power === POWER_TYPES.COMET_H || tile1.power === POWER_TYPES.COMET_V))
@@ -209,7 +312,6 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             }
 
             spawnPowerEffect('supernova', r2, c2, { targets, targetColor });
-
             clearedSet.add(key(r1, c1));
             clearedSet.add(key(r2, c2));
 
@@ -223,7 +325,49 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
                 spawnPowerEffect(pType === POWER_TYPES.COMET_H ? 'laser_h' : 'laser_v', tgt.row, tgt.col);
             }
         }
-        // Comet + Comet: Meteor Storm (Clears entire row AND entire column)
+        // 3. Combination: Supernova + Black Hole (Bomb) -> Converts ALL planets of that color into Bombs and detonates all!
+        else if (
+            (tile1.power === POWER_TYPES.SUPERNOVA && tile2.power === POWER_TYPES.BLACK_HOLE) ||
+            (tile2.power === POWER_TYPES.SUPERNOVA && tile1.power === POWER_TYPES.BLACK_HOLE)
+        ) {
+            const nonSupernova = tile1.power === POWER_TYPES.SUPERNOVA ? tile2 : tile1;
+            const targetColor = nonSupernova.type;
+            audioComposable.playSupernova();
+            audioComposable.playBlackHole();
+            triggerScreenShake('heavy');
+
+            const targets = [];
+            for (let r = 0; r < engine.value.rows; r++) {
+                for (let c = 0; c < engine.value.cols; c++) {
+                    const t = engine.value.getTile(r, c);
+                    if (t && t.type === targetColor) {
+                        targets.push({ row: r, col: c });
+                    }
+                }
+            }
+
+            spawnPowerEffect('supernova', r2, c2, { targets, targetColor });
+            clearedSet.add(key(r1, c1));
+            clearedSet.add(key(r2, c2));
+
+            await sleep(400);
+
+            // Convert and trigger all matching tiles into 3x3 explosive bombs
+            for (const tgt of targets) {
+                clearedSet.add(key(tgt.row, tgt.col));
+                spawnPowerEffect('black_hole', tgt.row, tgt.col);
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = tgt.row + dr;
+                        const nc = tgt.col + dc;
+                        if (nr >= 0 && nr < engine.value.rows && nc >= 0 && nc < engine.value.cols) {
+                            clearedSet.add(key(nr, nc));
+                        }
+                    }
+                }
+            }
+        }
+        // 4. Combination: Comet + Comet -> Meteor Storm (Clears 1 full row AND 1 full column in a cross)
         else if (
             (tile1.power === POWER_TYPES.COMET_H || tile1.power === POWER_TYPES.COMET_V) &&
             (tile2.power === POWER_TYPES.COMET_H || tile2.power === POWER_TYPES.COMET_V)
@@ -236,7 +380,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
             triggerCometClear(r2, c2, POWER_TYPES.COMET_H, clearedSet);
             triggerCometClear(r2, c2, POWER_TYPES.COMET_V, clearedSet);
         }
-        // Comet + Black Hole: Gravity Storm (Clears 3 full rows and 3 full columns)
+        // 5. Combination: Comet + Black Hole -> Giant 3-wide Cross (Clears 3 full rows AND 3 full columns)
         else if (
             (tile1.power === POWER_TYPES.BLACK_HOLE && (tile2.power === POWER_TYPES.COMET_H || tile2.power === POWER_TYPES.COMET_V)) ||
             (tile2.power === POWER_TYPES.BLACK_HOLE && (tile1.power === POWER_TYPES.COMET_H || tile1.power === POWER_TYPES.COMET_V))
@@ -400,6 +544,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         syncGrid();
 
         audioComposable.playMatch(activeCascades.value);
+        haptics.vibrateMedium();
 
         // Compute scores
         for (const m of matchResult.matches) {
@@ -594,6 +739,7 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         }
 
         audioComposable.playVictory();
+        haptics.vibrateSuccess();
 
         // 1.5 second victory celebration delay before modal appears
         await sleep(1500);
@@ -651,5 +797,6 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
         selectTile,
         handleSwipe,
         syncGrid,
+        triggerInstantBooster,
     };
 }

@@ -226,6 +226,17 @@
                 />
             </div>
 
+            <!-- In-Game Booster Arsenal Dock -->
+            <div class="w-full flex items-center justify-center py-0.5">
+                <BoosterBar
+                    :inventory="boosters.inventory.value"
+                    :active-booster="boosters.activeBooster.value"
+                    @select="boosters.selectBooster"
+                    @cancel="boosters.cancelBooster"
+                    @trigger-instant="board.triggerInstantBooster"
+                />
+            </div>
+
             <!-- Subtle Bottom Status -->
             <div class="w-full flex items-center justify-between px-3 py-0.5 text-[11px] text-slate-500 font-medium">
                 <span class="flex items-center gap-1">
@@ -295,6 +306,7 @@ import ScoreDisplay from '../../PlanetBurst/components/ScoreDisplay.vue';
 import MoveCounter from '../../PlanetBurst/components/MoveCounter.vue';
 import MissionObjective from '../../PlanetBurst/components/MissionObjective.vue';
 import GalaxyMap from '../../PlanetBurst/components/GalaxyMap.vue';
+import BoosterBar from '../../PlanetBurst/components/BoosterBar.vue';
 import MissionCompleteModal from '../../PlanetBurst/components/MissionCompleteModal.vue';
 import MissionFailedModal from '../../PlanetBurst/components/MissionFailedModal.vue';
 import DailyMissionModal from '../../PlanetBurst/components/DailyMissionModal.vue';
@@ -304,6 +316,7 @@ import SettingsModal from '../../PlanetBurst/components/SettingsModal.vue';
 import { useAudio } from '../../PlanetBurst/composables/useAudio.js';
 import { useScore } from '../../PlanetBurst/composables/useScore.js';
 import { useMission } from '../../PlanetBurst/composables/useMission.js';
+import { useBoosters } from '../../PlanetBurst/composables/useBoosters.js';
 import { useCosmicBoard } from '../../PlanetBurst/composables/useCosmicBoard.js';
 import { useGameSession } from '../../PlanetBurst/composables/useGameSession.js';
 import { DEFAULT_WORLDS_DATA } from '../../PlanetBurst/engine/DefaultLevels.js';
@@ -327,7 +340,8 @@ const props = defineProps({
 const audio = useAudio();
 const score = useScore();
 const mission = useMission();
-const board = useCosmicBoard(audio, score, mission);
+const boosters = useBoosters();
+const board = useCosmicBoard(audio, score, mission, boosters);
 const session = useGameSession();
 
 // Navigation & View State
