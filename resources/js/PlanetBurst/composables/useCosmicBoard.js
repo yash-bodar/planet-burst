@@ -440,10 +440,9 @@ export function useCosmicBoard(audioComposable, scoreComposable, missionComposab
 
             await sleep(450);
         }
-        // Single power tile trigger
+        // YB - 17-09-2026 Combinations and Supernova covered above; single powers never auto-detonate unless part of a match
         else {
-            if (tile1.power) activateSinglePower(r1, c1, tile1.power, clearedSet);
-            if (tile2.power) activateSinglePower(r2, c2, tile2.power, clearedSet);
+            return;
         }
 
         // Execute cleared tiles
