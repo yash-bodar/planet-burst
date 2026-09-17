@@ -1,6 +1,5 @@
 <template>
     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
-    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
         <div
             v-for="(obj, idx) in objectives"
             :key="idx"

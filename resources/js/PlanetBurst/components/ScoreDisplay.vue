@@ -85,7 +85,6 @@ const props = defineProps({
 
 const formattedScore = computed(() => {
     return (props.score || 0).toLocaleString();
-    return (props.score || 0).toLocaleString();
 });
 
 const progressPercent = computed(() => {
